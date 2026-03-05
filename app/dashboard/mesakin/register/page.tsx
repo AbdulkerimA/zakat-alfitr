@@ -18,6 +18,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -25,21 +26,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 
 const formSchema = z.object({
-  fullName: z.string().min(2, 'Name must be at least 2 characters'),
-  phone: z.string().min(10, 'Valid phone number is required'),
+  name: z.string().min(2, 'Name is required'),
+  phone: z.string().min(10, 'Phone number is required'),
   address: z.string().min(5, 'Address is required'),
-  familyMembers: z.string().transform(Number).pipe(
-    z.number().min(1, 'At least 1 family member').max(20, 'Maximum 20 family members')
-  ),
+  familyMembers: z.string().min(1, 'Number of family members is required'),
   incomeLevel: z.enum(['very_low', 'low', 'moderate']),
-  needsDescription: z.string().min(10, 'Please describe the needs'),
-  idType: z.enum(['national_id', 'passport', 'other']),
-  idNumber: z.string().min(3, 'ID number is required'),
+  notes: z.string().optional(),
 });
 
 export default function MesakinRegisterPage() {
@@ -47,23 +45,21 @@ export default function MesakinRegisterPage() {
   const { user, masjidId } = useAuth();
   const [loading, setLoading] = useState(false);
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      fullName: '',
+      name: '',
       phone: '',
       address: '',
-      familyMembers: 1,
+      familyMembers: '1',
       incomeLevel: 'low',
-      needsDescription: '',
-      idType: 'national_id',
-      idNumber: '',
+      notes: '',
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  const onSubmit = async (values: any) => {
     if (!masjidId || !user) {
-      toast.error('You must be logged in to register');
+      toast.error('You must be logged in');
       return;
     }
 
@@ -71,37 +67,40 @@ export default function MesakinRegisterPage() {
     try {
       await addDoc(collection(db, 'mesakin'), {
         ...values,
+        familyMembers: parseInt(values.familyMembers),
         masjidId,
         status: 'pending',
         registeredBy: user.uid,
         registeredAt: new Date(),
       });
 
-      toast.success('Mesakin registered successfully!');
+      toast.success('Mesakin registered successfully');
       router.push('/dashboard/mesakin');
     } catch (error: any) {
-      console.error('Registration error:', error);
-      toast.error(error.message || 'Failed to register');
+      toast.error(error.message || 'Registration failed');
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="max-w-2xl mx-auto">
+      <div className="mb-6">
+        <Link href="/dashboard" className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1">
+          <ArrowLeft className="h-4 w-4" /> Back to Dashboard
+        </Link>
+      </div>
+
       <Card>
         <CardHeader>
-          <CardTitle>Register Mesakin (Zakat Recipients)</CardTitle>
-          <CardDescription>
-            Enter the details of families eligible to receive Zakat al-Fitr
-          </CardDescription>
+          <CardTitle>Register Mesakin (Recipients)</CardTitle>
         </CardHeader>
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
-                name="fullName"
+                name="name"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Full Name</FormLabel>
@@ -135,7 +134,7 @@ export default function MesakinRegisterPage() {
                     <FormItem>
                       <FormLabel>Family Members</FormLabel>
                       <FormControl>
-                        <Input type="number" min="1" max="20" {...field} />
+                        <Input type="number" min="1" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -182,14 +181,14 @@ export default function MesakinRegisterPage() {
 
               <FormField
                 control={form.control}
-                name="needsDescription"
+                name="notes"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Needs Description</FormLabel>
+                    <FormLabel>Additional Notes</FormLabel>
                     <FormControl>
                       <Textarea 
-                        placeholder="Describe the family's needs and circumstances"
-                        className="min-h-[100px]"
+                        placeholder="Any additional information..."
+                        className="min-h-25"
                         {...field}
                       />
                     </FormControl>
@@ -197,45 +196,6 @@ export default function MesakinRegisterPage() {
                   </FormItem>
                 )}
               />
-
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="idType"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>ID Type</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select ID type" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="national_id">National ID</SelectItem>
-                          <SelectItem value="passport">Passport</SelectItem>
-                          <SelectItem value="other">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="idNumber"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>ID Number</FormLabel>
-                      <FormControl>
-                        <Input placeholder="ID number" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
 
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? 'Registering...' : 'Register Mesakin'}
