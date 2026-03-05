@@ -21,9 +21,9 @@ export function DashboardHeader() {
   const initials = user?.email?.charAt(0).toUpperCase() || 'U';
 
   return (
-    <header className="bg-white border-b h-16 flex items-center justify-between px-6">
+    <header className="bg-white border-b h-14 md:h-16 flex items-center justify-between px-4 md:px-6">
       <div className="flex items-center gap-2">
-        <h1 className="font-semibold text-lg">{masjid?.name || 'Loading...'}</h1>
+        <h1 className="font-semibold text-base md:text-lg truncate">{masjid?.name || 'Loading...'}</h1>
       </div>
 
       <DropdownMenu>

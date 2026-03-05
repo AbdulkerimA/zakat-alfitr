@@ -14,7 +14,10 @@ import {
 } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { format } from 'date-fns';
+import { LayoutGrid, TableIcon, Search } from 'lucide-react';
 
 interface Muzaki {
   id: string;
@@ -32,6 +35,9 @@ export default function MuzakiPage() {
   const [muzaki, setMuzaki] = useState<Muzaki[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalCollected, setTotalCollected] = useState(0);
+  const [viewMode, setViewMode] = useState<'card' | 'table'>('card');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
 
   useEffect(() => {
     const fetchMuzaki = async () => {
@@ -68,9 +74,37 @@ export default function MuzakiPage() {
     );
   }
 
+  const filteredMuzaki = muzaki.filter(m => {
+    const matchesSearch = m.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         m.phone.includes(searchTerm) ||
+                         m.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || m.paymentStatus === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  const statuses = ['all', ...Array.from(new Set(muzaki.map(m => m.paymentStatus)))];
+
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Muzaki List</h1>
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl md:text-3xl font-bold">Muzaki List</h1>
+        <div className="hidden md:flex gap-2">
+          <Button
+            variant={viewMode === 'card' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setViewMode('card')}
+          >
+            <LayoutGrid className="h-4 w-4" />
+          </Button>
+          <Button
+            variant={viewMode === 'table' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setViewMode('table')}
+          >
+            <TableIcon className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
 
       <Card className="bg-green-50">
         <CardContent className="pt-6">
@@ -81,14 +115,38 @@ export default function MuzakiPage() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Registered Donors</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {muzaki.length === 0 ? (
-            <p className="text-center text-gray-500 py-8">No muzaki registered yet</p>
-          ) : (
+      <div className="flex flex-col md:flex-row gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input
+            placeholder="Search by name, phone, or email..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="px-3 py-2 border rounded-md bg-white text-sm"
+        >
+          {statuses.map(status => (
+            <option key={status} value={status}>
+              {status === 'all' ? 'All Status' : status}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {filteredMuzaki.length === 0 ? (
+        <Card>
+          <CardContent className="py-8">
+            <p className="text-center text-gray-500">No muzaki registered yet</p>
+          </CardContent>
+        </Card>
+      ) : viewMode === 'table' ? (
+        <Card className="hidden md:block">
+          <CardContent className="p-0">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -102,7 +160,7 @@ export default function MuzakiPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {muzaki.map((m) => (
+                {filteredMuzaki.map((m) => (
                   <TableRow key={m.id}>
                     <TableCell className="font-medium">{m.name}</TableCell>
                     <TableCell>{m.phone}</TableCell>
@@ -110,22 +168,56 @@ export default function MuzakiPage() {
                     <TableCell>{m.peopleCount}</TableCell>
                     <TableCell>${m.amount}</TableCell>
                     <TableCell>
-                      <Badge className="bg-green-100 text-green-800">
-                        {m.paymentStatus}
-                      </Badge>
+                      <Badge className="bg-green-100 text-green-800">{m.paymentStatus}</Badge>
                     </TableCell>
                     <TableCell>
-                      {m.registeredAt?.toDate ? 
-                        format(m.registeredAt.toDate(), 'MMM dd, yyyy') : 
-                        'N/A'}
+                      {m.registeredAt?.toDate ? format(m.registeredAt.toDate(), 'MMM dd, yyyy') : 'N/A'}
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {filteredMuzaki.map((m) => (
+            <Card key={m.id}>
+              <CardHeader>
+                <CardTitle className="text-lg">{m.name}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Phone:</span>
+                  <span className="font-medium">{m.phone}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Email:</span>
+                  <span className="font-medium">{m.email}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">People Count:</span>
+                  <span className="font-medium">{m.peopleCount}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Amount:</span>
+                  <span className="font-bold text-green-600">${m.amount}</span>
+                </div>
+                <div className="flex justify-between text-sm items-center">
+                  <span className="text-gray-500">Status:</span>
+                  <Badge className="bg-green-100 text-green-800">{m.paymentStatus}</Badge>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Date:</span>
+                  <span className="font-medium">
+                    {m.registeredAt?.toDate ? format(m.registeredAt.toDate(), 'MMM dd, yyyy') : 'N/A'}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

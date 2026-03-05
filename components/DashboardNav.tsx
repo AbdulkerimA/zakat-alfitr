@@ -27,8 +27,8 @@ export function DashboardNav() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-64 bg-white border-r min-h-[calc(100vh-4rem)]">
-      <nav className="p-4 space-y-1">
+    <aside className="fixed bottom-4 left-1/2 -translate-x-1/2 md:static md:translate-x-0 md:w-64 md:min-h-screen z-50">
+      <nav className="bg-white rounded-full shadow-lg md:shadow-none md:rounded-none flex justify-center items-start md:justify-start md:flex-col p-2 md:p-4 gap-1 md:gap-1 md:border-r">
         {navItems.map((item) => {
           const Icon = item.icon;
           return (
@@ -36,14 +36,14 @@ export function DashboardNav() {
               key={item.href}
               href={item.href}
               className={cn(
-                'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors',
+                'flex flex-col md:flex-row items-center justify-center gap-1 md:gap-3 p-3 md:px-3 md:py-2 rounded-full md:rounded-lg transition-colors',
                 pathname === item.href
-                  ? 'bg-green-50 text-green-700'
-                  : 'text-gray-600 hover:bg-gray-50'
+                  ? 'bg-green-600 text-white md:bg-green-50 md:text-green-700'
+                  : 'text-gray-600 hover:bg-gray-100 md:hover:bg-gray-50'
               )}
             >
-              <Icon className="h-4 w-4" />
-              {item.label}
+              <Icon className="h-5 w-5 md:h-4 md:w-4" />
+              <span className="hidden md:inline text-sm">{item.label}</span>
             </Link>
           );
         })}
