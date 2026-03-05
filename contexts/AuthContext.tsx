@@ -7,17 +7,16 @@ import {
   signOut as firebaseSignOut,
   onAuthStateChanged
 } from 'firebase/auth';
-import { auth } from '@/lib/firebase/config';
+import { auth, db } from '@/lib/firebase/config';
 import { doc, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
 
 interface AuthContextType {
   user: User | null;
   userRole: string | null;
   masjidId: string | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
-  signOut: () => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -33,11 +32,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(user);
       
       if (user) {
-        // Fetch user role and masjid from Firestore
-        const userDoc = await getDoc(doc(db, 'distributors', user.uid));
-        if (userDoc.exists()) {
-          setUserRole(userDoc.data().role);
-          setMasjidId(userDoc.data().masjidId);
+        try {
+          const userDoc = await getDoc(doc(db, 'distributors', user.uid));
+          if (userDoc.exists()) {
+            const data = userDoc.data();
+            setUserRole(data.role);
+            setMasjidId(data.masjidId);
+          }
+        } catch (error) {
+          console.error('Error fetching user data:', error);
         }
       } else {
         setUserRole(null);
@@ -50,16 +53,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => unsubscribe();
   }, []);
 
-  const signIn = async (email: string, password: string) => {
+  const login = async (email: string, password: string) => {
     await signInWithEmailAndPassword(auth, email, password);
   };
 
-  const signOut = async () => {
+  const logout = async () => {
     await firebaseSignOut(auth);
   };
 
   return (
-    <AuthContext.Provider value={{ user, userRole, masjidId, loading, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, userRole, masjidId, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
