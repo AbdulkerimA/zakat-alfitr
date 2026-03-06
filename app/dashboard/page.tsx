@@ -49,11 +49,11 @@ export default function DashboardPage() {
         const muzakiSnap = await getDocs(muzakiQuery);
         const muzaki = muzakiSnap.docs.map(doc => doc.data());
         
-        const totalCollected = muzaki.reduce((sum, m) => sum + (m.amount || 0), 0);
+        const totalCollected = muzaki.reduce((sum, m) => sum + (m.amount + m.extra || 0), 0);
         const pendingMesakin = mesakin.filter(m => m.status === 'pending').length;
         
-        const zakatAmount = config?.zakatAmount || 10;
-        const supportedFamilies = Math.floor(totalCollected / zakatAmount);
+        const onePersonPackage = config?.packageCost || 100;
+        const supportedFamilies = Math.floor(totalCollected / onePersonPackage);
 
         setStats({
           totalMesakin: mesakin.length,
@@ -103,7 +103,7 @@ export default function DashboardPage() {
       title: 'Can Support',
       value: stats.supportedFamilies,
       icon: Package,
-      desc: `Families ($${config?.zakatAmount || 10} each)`,
+      desc: `${config?.packageCost || 100} ETB for each person`,
     },
   ];
 
