@@ -116,7 +116,7 @@ export default function ConfigPage() {
                 name="zakatAmount"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Zakat Amount per Person ($)</FormLabel>
+                    <FormLabel>Zakat Amount per Person (ETB)</FormLabel>
                     <FormControl>
                       <Input type="number" min="1" {...field} />
                     </FormControl>
@@ -150,7 +150,7 @@ export default function ConfigPage() {
                 name="packageCost"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Package Cost ($)</FormLabel>
+                    <FormLabel>Package Cost (ETB)</FormLabel>
                     <FormControl>
                       <Input type="number" min="1" {...field} />
                     </FormControl>
@@ -162,7 +162,7 @@ export default function ConfigPage() {
                 )}
               />
 
-              <FormField
+              {/* <FormField
                 control={form.control}
                 name="maxPerDistributor"
                 render={({ field }) => (
@@ -177,7 +177,7 @@ export default function ConfigPage() {
                     <FormMessage />
                   </FormItem>
                 )}
-              />
+              /> */}
 
               <Button type="submit" className="w-full" disabled={loading}>
                 <Save className="mr-2 h-4 w-4" />
