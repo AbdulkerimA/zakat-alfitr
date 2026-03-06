@@ -19,7 +19,7 @@ const navItems = [
   { href: '/dashboard/muzaki/register', label: 'Register Muzaki', icon: HandCoins },
   { href: '/dashboard/mesakin', label: 'Mesakin List', icon: Users },
   { href: '/dashboard/muzaki', label: 'Muzaki List', icon: List },
-  { href: '/dashboard/distributions', label: 'Distributions', icon: Package },
+  // { href: '/dashboard/distributions', label: 'Distributions', icon: Package },
   { href: '/dashboard/config', label: 'Settings', icon: Settings },
 ];
 
