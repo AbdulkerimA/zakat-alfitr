@@ -17,7 +17,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { format } from 'date-fns';
-import { LayoutGrid, TableIcon, Search } from 'lucide-react';
+import { LayoutGrid, TableIcon, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface Muzaki {
   id: string;
@@ -38,6 +38,8 @@ export default function MuzakiPage() {
   const [viewMode, setViewMode] = useState<'card' | 'table'>('card');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 9;
 
   useEffect(() => {
     const fetchMuzaki = async () => {
@@ -83,6 +85,10 @@ export default function MuzakiPage() {
   });
 
   const statuses = ['all', ...Array.from(new Set(muzaki.map(m => m.paymentStatus)))];
+
+  const totalPages = Math.ceil(filteredMuzaki.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedMuzaki = filteredMuzaki.slice(startIndex, startIndex + itemsPerPage);
 
   return (
     <div className="space-y-4 md:space-y-6">
@@ -160,7 +166,7 @@ export default function MuzakiPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredMuzaki.map((m) => (
+                {paginatedMuzaki.map((m) => (
                   <TableRow key={m.id}>
                     <TableCell className="font-medium">{m.name}</TableCell>
                     <TableCell>{m.phone}</TableCell>
@@ -181,7 +187,7 @@ export default function MuzakiPage() {
         </Card>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {filteredMuzaki.map((m) => (
+          {paginatedMuzaki.map((m) => (
             <Card key={m.id}>
               <CardHeader>
                 <CardTitle className="text-lg">{m.name}</CardTitle>
@@ -216,6 +222,33 @@ export default function MuzakiPage() {
               </CardContent>
             </Card>
           ))}
+        </div>
+      )}
+
+      {filteredMuzaki.length > 0 && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-gray-600">
+            Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredMuzaki.length)} of {filteredMuzaki.length}
+          </p>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <span className="px-3 py-2 text-sm">{currentPage} / {totalPages}</span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       )}
     </div>

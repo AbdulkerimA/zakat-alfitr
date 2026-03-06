@@ -17,7 +17,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { format } from 'date-fns';
-import { LayoutGrid, TableIcon, Search } from 'lucide-react';
+import { LayoutGrid, TableIcon, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface Mesakin {
   id: string;
@@ -36,6 +36,8 @@ export default function MesakinPage() {
   const [viewMode, setViewMode] = useState<'card' | 'table'>('card');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 9;
 
   useEffect(() => {
     const fetchMesakin = async () => {
@@ -79,6 +81,10 @@ export default function MesakinPage() {
   });
 
   const statuses = ['all', ...Array.from(new Set(mesakin.map(m => m.status)))];
+
+  const totalPages = Math.ceil(filteredMesakin.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedMesakin = filteredMesakin.slice(startIndex, startIndex + itemsPerPage);
 
   const getStatusBadge = (status: string) => {
     const colors = {
@@ -155,7 +161,7 @@ export default function MesakinPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredMesakin.map((m) => (
+                {paginatedMesakin.map((m) => (
                   <TableRow key={m.id}>
                     <TableCell className="font-medium">{m.name}</TableCell>
                     <TableCell>{m.phone}</TableCell>
@@ -175,7 +181,7 @@ export default function MesakinPage() {
         </Card>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {filteredMesakin.map((m) => (
+          {paginatedMesakin.map((m) => (
             <Card key={m.id}>
               <CardHeader>
                 <CardTitle className="text-lg">{m.name}</CardTitle>
@@ -206,6 +212,33 @@ export default function MesakinPage() {
               </CardContent>
             </Card>
           ))}
+        </div>
+      )}
+
+      {filteredMesakin.length > 0 && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-gray-600">
+            Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredMesakin.length)} of {filteredMesakin.length}
+          </p>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <span className="px-3 py-2 text-sm">{currentPage} / {totalPages}</span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       )}
     </div>
