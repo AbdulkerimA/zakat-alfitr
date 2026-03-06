@@ -27,7 +27,7 @@ export function DashboardNav() {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed bottom-4 left-1/2 -translate-x-1/2 md:static md:translate-x-0 md:w-64 md:min-h-screen z-50">
+    <aside className="fixed bottom-4 bg-white left-1/2 -translate-x-1/2 shadow-lg md:static md:translate-x-0 md:w-64 md:min-h-[calc(100vh-4rem)] z-50">
       <nav className="bg-white rounded-full shadow-lg md:shadow-none md:rounded-none flex justify-center items-start md:justify-start md:flex-col p-2 md:p-4 gap-1 md:gap-1 md:border-r">
         {navItems.map((item) => {
           const Icon = item.icon;
