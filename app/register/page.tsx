@@ -25,11 +25,8 @@ import { Building, Mail, Phone, User, Lock, MapPin } from 'lucide-react';
 
 const formSchema = z.object({
   masjidName: z.string().min(2, 'Masjid name is required'),
-  address: z.string().min(5, 'Address is required'),
   city: z.string().min(2, 'City is required'),
-  state: z.string().min(2, 'State is required'),
-  phone: z.string().min(10, 'Valid phone number is required'),
-  email: z.string().email('Invalid email'),
+  adminPhone: z.string().min(10, 'Valid phone number is required'),
   adminName: z.string().min(2, 'Admin name is required'),
   adminEmail: z.string().email('Invalid admin email'),
   adminPassword: z.string().min(6, 'Password must be at least 6 characters'),
@@ -43,11 +40,7 @@ export default function RegisterPage() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       masjidName: '',
-      address: '',
-      city: '',
-      state: '',
-      phone: '',
-      email: '',
+      adminPhone: '',
       adminName: '',
       adminEmail: '',
       adminPassword: '',
@@ -67,11 +60,7 @@ export default function RegisterPage() {
       // Create masjid document
       const masjidRef = await addDoc(collection(db, 'masjids'), {
         name: values.masjidName,
-        address: values.address,
         city: values.city,
-        state: values.state,
-        phone: values.phone,
-        email: values.email,
         adminName: values.adminName,
         adminEmail: values.adminEmail,
         createdAt: new Date(),
@@ -83,6 +72,7 @@ export default function RegisterPage() {
         uid: userCredential.user.uid,
         name: values.adminName,
         email: values.adminEmail,
+        phone: values.adminPhone,
         role: 'admin',
         active: true,
         createdAt: new Date(),
@@ -91,10 +81,10 @@ export default function RegisterPage() {
       // Create default config
       await addDoc(collection(db, 'configs'), {
         masjidId: masjidRef.id,
-        zakatAmount: 10,
-        packageItems: ['Rice (5kg)', 'Flour (3kg)', 'Dates (1kg)', 'Milk (2L)'],
-        packageCost: 10,
-        maxPerDistributor: 20,
+        zakatAmount: 120,
+        packageItems: ['Flour (5kg)'],
+        packageCost: 600,
+        maxPerDistributor: 2000,
         updatedAt: new Date(),
       });
 
@@ -146,24 +136,7 @@ export default function RegisterPage() {
                     )}
                   />
 
-                  <FormField
-                    control={form.control}
-                    name="address"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Street Address</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <MapPin className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                            <Input className="pl-10" placeholder="Street address" {...field} />
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4">
                     <FormField
                       control={form.control}
                       name="city"
@@ -172,56 +145,6 @@ export default function RegisterPage() {
                           <FormLabel>City</FormLabel>
                           <FormControl>
                             <Input placeholder="City" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="state"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>State</FormLabel>
-                          <FormControl>
-                            <Input placeholder="State" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="phone"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Phone</FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                              <Input className="pl-10" placeholder="Phone number" {...field} />
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                              <Input className="pl-10" type="email" placeholder="Masjid email" {...field} />
-                            </div>
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -249,6 +172,23 @@ export default function RegisterPage() {
                       </FormItem>
                     )}
                   />
+
+                  <FormField
+                      control={form.control}
+                      name="adminPhone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Phone</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                              <Input className="pl-10" placeholder="Phone number" {...field} />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
                   <FormField
                     control={form.control}

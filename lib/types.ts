@@ -3,11 +3,7 @@ export interface Masjid {
   name: string;
   address: string;
   city: string;
-  state: string;
-  phone: string;
-  email: string;
   adminName: string;
-  adminEmail: string;
   createdAt: any;
 }
 
@@ -26,9 +22,10 @@ export interface Mesakin {
   masjidId: string;
   name: string;
   phone: string;
+  idNumber: string;
   address: string;
   familyMembers: number;
-  incomeLevel: 'very_low' | 'low' | 'moderate';
+  // incomeLevel: 'very_low' | 'low' | 'moderate';
   notes: string;
   status: 'pending' | 'approved' | 'received';
   registeredAt: any;
@@ -39,12 +36,10 @@ export interface Muzaki {
   id: string;
   masjidId: string;
   name: string;
-  phone: string;
-  email: string;
-  address: string;
   peopleCount: number;
   amount: number;
-  paymentMethod: 'cash' | 'bank' | 'online';
+  givenAmount: number;
+  paymentMethod: 'cash' | 'transfer';
   paymentStatus: 'pending' | 'paid';
   registeredAt: any;
   registeredBy: string;
@@ -56,6 +51,7 @@ export interface Distributor {
   uid: string;
   name: string;
   email: string;
+  phone: string;
   role: 'admin' | 'distributor';
   active: boolean;
   createdAt: any;
