@@ -33,9 +33,9 @@ import Link from 'next/link';
 
 const formSchema = z.object({
   name: z.string().min(2, 'Name is required'),
-  phone: z.string().min(10, 'Phone number is required'),
-  email: z.string().email('Invalid email'),
-  address: z.string().min(5, 'Address is required'),
+  totalPayed: z.number().min(1, 'Amount must be greater than 0'),
+  Change: z.number().min(0, 'Change cannot be negative'),
+  extra: z.number().min(0, 'Change cannot be negative'),
   peopleCount: z.string().min(1, 'Number of people is required'),
   paymentMethod: z.enum(['cash', 'bank', 'online']),
 });
@@ -46,14 +46,16 @@ export default function MuzakiRegisterPage() {
   const { config } = useMasjid();
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
+  const [change, setChange] = useState(0);
+  const [amount, setAmount] = useState(0);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
-      phone: '',
-      email: '',
-      address: '',
+      totalPayed: 0,
+      Change: 0,
+      extra: 0,
       peopleCount: '1',
       paymentMethod: 'cash',
     },
@@ -122,52 +124,7 @@ export default function MuzakiRegisterPage() {
                   </FormItem>
                 )}
               />
-
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="phone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Phone Number</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Phone number" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input type="email" placeholder="Email address" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={form.control}
-                name="address"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Address</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Full address" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="peopleCount"
@@ -179,8 +136,67 @@ export default function MuzakiRegisterPage() {
                       </FormControl>
                       <FormMessage />
                     </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="totalPayed"
+                    render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Payed Amount</FormLabel>
+                      <FormControl>
+                      <Input
+                        placeholder="0"
+                        type="number"
+                        min="0"
+                        {...field}
+                        onChange={e => {
+                        const value = Number(e.target.value);
+                        field.onChange(value);
+                        // Calculate change and update form value
+                        const calculatedChange = value - total;
+                        form.setValue('Change', calculatedChange >= 0 ? calculatedChange : 0);
+                        form.setValue('extra', calculatedChange >= 0 ? calculatedChange : 0);
+                        }}
+                      />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                    )}
+                  />
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 <FormField
+                    control={form.control}
+                    name="Change"
+                    render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Change</FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="change" {...field} disabled/>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
                 />
+
+                <FormField
+                    control={form.control}
+                    name="extra"
+                    render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>extra amount</FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="change" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
 
                 <FormField
                   control={form.control}
@@ -209,11 +225,11 @@ export default function MuzakiRegisterPage() {
               <div className="bg-green-50 p-4 rounded-lg">
                 <div className="flex justify-between items-center">
                   <span className="font-medium">Amount per person:</span>
-                  <span>${config?.zakatAmount || 10}</span>
+                  <span>ETB {config?.zakatAmount || 10}</span>
                 </div>
                 <div className="flex justify-between items-center text-lg font-bold mt-2">
                   <span>Total Amount:</span>
-                  <span className="text-green-700">${total}</span>
+                  <span className="text-green-700">ETB {total}</span>
                 </div>
               </div>
 

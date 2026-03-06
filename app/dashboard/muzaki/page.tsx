@@ -26,6 +26,7 @@ interface Muzaki {
   email: string;
   peopleCount: number;
   amount: number;
+  extra: number;
   paymentStatus: string;
   registeredAt: any;
 }
@@ -57,7 +58,7 @@ export default function MuzakiPage() {
         })) as Muzaki[];
         
         setMuzaki(data);
-        setTotalCollected(data.reduce((sum, m) => sum + m.amount, 0));
+        setTotalCollected(data.reduce((sum, m) => sum + m.amount + m.extra, 0));
       } catch (error) {
         console.error('Error fetching muzaki:', error);
       } finally {
@@ -169,10 +170,8 @@ export default function MuzakiPage() {
                 {paginatedMuzaki.map((m) => (
                   <TableRow key={m.id}>
                     <TableCell className="font-medium">{m.name}</TableCell>
-                    <TableCell>{m.phone}</TableCell>
-                    <TableCell>{m.email}</TableCell>
                     <TableCell>{m.peopleCount}</TableCell>
-                    <TableCell>${m.amount}</TableCell>
+                    <TableCell>ETB {m.amount + m.extra}</TableCell>
                     <TableCell>
                       <Badge className="bg-green-100 text-green-800">{m.paymentStatus}</Badge>
                     </TableCell>
@@ -194,20 +193,12 @@ export default function MuzakiPage() {
               </CardHeader>
               <CardContent className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Phone:</span>
-                  <span className="font-medium">{m.phone}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Email:</span>
-                  <span className="font-medium">{m.email}</span>
-                </div>
-                <div className="flex justify-between text-sm">
                   <span className="text-gray-500">People Count:</span>
                   <span className="font-medium">{m.peopleCount}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-500">Amount:</span>
-                  <span className="font-bold text-green-600">${m.amount}</span>
+                  <span className="font-bold text-green-600">ETB {m.amount + m.extra}</span>
                 </div>
                 <div className="flex justify-between text-sm items-center">
                   <span className="text-gray-500">Status:</span>
