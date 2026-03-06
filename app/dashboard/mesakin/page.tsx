@@ -24,7 +24,7 @@ interface Mesakin {
   name: string;
   phone: string;
   familyMembers: number;
-  incomeLevel: string;
+  idNumber: string;
   status: string;
   registeredAt: any;
 }
@@ -166,7 +166,7 @@ export default function MesakinPage() {
                     <TableCell className="font-medium">{m.name}</TableCell>
                     <TableCell>{m.phone}</TableCell>
                     <TableCell>{m.familyMembers}</TableCell>
-                    <TableCell className="capitalize">{m.incomeLevel.replace('_', ' ')}</TableCell>
+                    <TableCell className="capitalize">{m.idNumber.replace('_', ' ')}</TableCell>
                     <TableCell>
                       <Badge className={getStatusBadge(m.status)}>{m.status}</Badge>
                     </TableCell>
@@ -196,8 +196,8 @@ export default function MesakinPage() {
                   <span className="font-medium">{m.familyMembers}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Income Level:</span>
-                  <span className="font-medium capitalize">{m.incomeLevel.replace('_', ' ')}</span>
+                  <span className="text-gray-500">ID Number:</span>
+                  <span className="font-medium capitalize">{m.idNumber}</span>
                 </div>
                 <div className="flex justify-between text-sm items-center">
                   <span className="text-gray-500">Status:</span>

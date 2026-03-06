@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { db } from '@/lib/firebase/config';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import {
@@ -35,8 +35,8 @@ const formSchema = z.object({
   name: z.string().min(2, 'Name is required'),
   phone: z.string().min(10, 'Phone number is required'),
   address: z.string().min(5, 'Address is required'),
+  idNumber: z.string().min(1, 'ID number is required'),
   familyMembers: z.string().min(1, 'Number of family members is required'),
-  incomeLevel: z.enum(['very_low', 'low', 'moderate']),
   notes: z.string().optional(),
 });
 
@@ -51,8 +51,8 @@ export default function MesakinRegisterPage() {
       name: '',
       phone: '',
       address: '',
+      idNumber: '',
       familyMembers: '1',
-      incomeLevel: 'low',
       notes: '',
     },
   });
@@ -65,6 +65,32 @@ export default function MesakinRegisterPage() {
 
     setLoading(true);
     try {
+      // Check if phone already exists
+      const phoneQuery = query(
+        collection(db, 'mesakin'),
+        where('phone', '==', values.phone)
+      );
+      const phoneSnapshot = await getDocs(phoneQuery);
+      
+      if (!phoneSnapshot.empty) {
+        toast.error('Phone number already registered');
+        setLoading(false);
+        return;
+      }
+
+      // Check if ID number already exists
+      const idQuery = query(
+        collection(db, 'mesakin'),
+        where('idNumber', '==', values.idNumber)
+      );
+      const idSnapshot = await getDocs(idQuery);
+      
+      if (!idSnapshot.empty) {
+        toast.error('ID number already registered');
+        setLoading(false);
+        return;
+      }
+
       await addDoc(collection(db, 'mesakin'), {
         ...values,
         familyMembers: parseInt(values.familyMembers),
@@ -141,6 +167,20 @@ export default function MesakinRegisterPage() {
                   )}
                 />
               </div>
+              
+              <FormField
+                control={form.control}
+                name="idNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Identification Number</FormLabel>
+                    <FormControl>
+                      <Input placeholder="identification number of FAN" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <FormField
                 control={form.control}
@@ -158,33 +198,10 @@ export default function MesakinRegisterPage() {
 
               <FormField
                 control={form.control}
-                name="incomeLevel"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Income Level</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select income level" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="very_low">Very Low</SelectItem>
-                        <SelectItem value="low">Low</SelectItem>
-                        <SelectItem value="moderate">Moderate</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
                 name="notes"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Additional Notes</FormLabel>
+                    <FormLabel>Additional Notes (optional)</FormLabel>
                     <FormControl>
                       <Textarea 
                         placeholder="Any additional information..."
