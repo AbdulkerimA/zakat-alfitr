@@ -9,6 +9,7 @@ import { db } from '@/lib/firebase/config';
 import { collection, query, where, getDocs, addDoc, updateDoc, doc } from 'firebase/firestore';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMasjid } from '@/contexts/MasjidContext';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -33,6 +34,7 @@ const formSchema = z.object({
 });
 
 export default function ConfigPage() {
+  const t = useTranslations();
   const router = useRouter();
   const { user, masjidId } = useAuth();
   const { config, refresh } = useMasjid();
@@ -63,7 +65,7 @@ export default function ConfigPage() {
 
   const onSubmit = async (values: any) => {
     if (!masjidId || !user) {
-      toast.error('You must be logged in');
+      toast.error(t('common.loading'));
       return;
     }
 
@@ -79,18 +81,16 @@ export default function ConfigPage() {
       };
 
       if (configId) {
-        // Update existing
         await updateDoc(doc(db, 'configs', configId), configData);
-        toast.success('Configuration updated');
+        toast.success(t('config.updateSuccess'));
       } else {
-        // Create new
         await addDoc(collection(db, 'configs'), configData);
-        toast.success('Configuration saved');
+        toast.success(t('config.saveSuccess'));
       }
 
       await refresh();
     } catch (error: any) {
-      toast.error(error.message || 'Failed to save configuration');
+      toast.error(error.message);
     } finally {
       setLoading(false);
     }
@@ -100,13 +100,13 @@ export default function ConfigPage() {
     <div className="max-w-2xl mx-auto">
       <div className="mb-6">
         <Link href="/dashboard" className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1">
-          <ArrowLeft className="h-4 w-4" /> Back to Dashboard
+          <ArrowLeft className="h-4 w-4" /> {t('mesakin.backToDashboard')}
         </Link>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Masjid Configuration</CardTitle>
+          <CardTitle>{t('config.title')}</CardTitle>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -116,12 +116,12 @@ export default function ConfigPage() {
                 name="zakatAmount"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Zakat Amount per Person (ETB)</FormLabel>
+                    <FormLabel>{t('config.zakatAmount')}</FormLabel>
                     <FormControl>
                       <Input type="number" min="1" {...field} />
                     </FormControl>
                     <FormDescription>
-                      The amount each person should pay for Zakat al-Fitr
+                      {t('config.zakatAmountDesc')}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -133,12 +133,12 @@ export default function ConfigPage() {
                 name="packageItems"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Distribution Package Items</FormLabel>
+                    <FormLabel>{t('config.packageItems')}</FormLabel>
                     <FormControl>
-                      <Input placeholder="Item1, Item2, Item3" {...field} />
+                      <Input placeholder={t('config.packageItemsPlaceholder')} {...field} />
                     </FormControl>
                     <FormDescription>
-                      Enter items separated by commas
+                      {t('config.packageItemsDesc')}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -150,12 +150,12 @@ export default function ConfigPage() {
                 name="packageCost"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Package Cost (ETB)</FormLabel>
+                    <FormLabel>{t('config.packageCost')}</FormLabel>
                     <FormControl>
                       <Input type="number" min="1" {...field} />
                     </FormControl>
                     <FormDescription>
-                      Estimated cost of one distribution package
+                      {t('config.packageCostDesc')}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -181,7 +181,7 @@ export default function ConfigPage() {
 
               <Button type="submit" className="w-full" disabled={loading}>
                 <Save className="mr-2 h-4 w-4" />
-                {loading ? 'Saving...' : 'Save Configuration'}
+                {loading ? t('config.saving') : t('config.saveConfig')}
               </Button>
             </form>
           </Form>

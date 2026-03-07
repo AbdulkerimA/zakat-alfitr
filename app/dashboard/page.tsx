@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useMasjid } from '@/contexts/MasjidContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, Wallet, Users2, Package } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface Stats {
   totalMesakin: number;
@@ -19,6 +20,7 @@ interface Stats {
 export default function DashboardPage() {
   const { masjidId } = useAuth();
   const { config } = useMasjid();
+  const t = useTranslations('dashboard');
   const [stats, setStats] = useState<Stats>({
     totalMesakin: 0,
     totalMuzaki: 0,
@@ -82,34 +84,34 @@ export default function DashboardPage() {
 
   const cards = [
     {
-      title: 'Total Mesakin',
+      title: t('totalMesakin'),
       value: stats.totalMesakin,
       icon: Users,
-      desc: 'Registered families',
+      desc: t('registeredFamilies'),
     },
     {
-      title: 'Total Muzaki',
+      title: t('totalMuzaki'),
       value: stats.totalMuzaki,
       icon: Users2,
-      desc: 'Registered donors',
+      desc: t('registeredDonors'),
     },
     {
-      title: 'Total Collected',
+      title: t('totalCollected'),
       value: `${stats.totalCollected} ETB`,
       icon: Wallet,
-      desc: 'From donations',
+      desc: t('fromDonations'),
     },
     {
-      title: 'Can Support',
+      title: t('canSupport'),
       value: stats.supportedFamilies,
       icon: Package,
-      desc: `${config?.packageCost || 100} ETB for each person`,
+      desc: `${config?.packageCost || 100} ETB ${t('each')}`,
     },
   ];
 
   return (
     <div className="space-y-4 md:space-y-6">
-      <h1 className="text-2xl md:text-3xl font-bold">Dashboard</h1>
+      <h1 className="text-2xl md:text-3xl font-bold">{t('title')}</h1>
       
       <div className="grid gap-3 md:gap-4 grid-cols-2 lg:grid-cols-4">
         {cards.map((card) => {
@@ -134,17 +136,17 @@ export default function DashboardPage() {
       <div className="grid gap-3 md:gap-4 grid-cols-1 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Pending Approvals</CardTitle>
+            <CardTitle>{t('pendingApprovals')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-yellow-600">{stats.pendingMesakin}</div>
-            <p className="text-sm text-gray-500 mt-1">Mesakin waiting for review</p>
+            <p className="text-sm text-gray-500 mt-1">{t('mesakinWaiting')}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Collection Progress</CardTitle>
+            <CardTitle>{t('collectionProgress')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-green-600">
@@ -152,7 +154,7 @@ export default function DashboardPage() {
                 ? `${Math.min(100, Math.round((stats.totalCollected / (stats.supportedFamilies * (config?.zakatAmount || 10))) * 100))}%`
                 : '0%'}
             </div>
-            <p className="text-sm text-gray-500 mt-1">Towards target</p>
+            <p className="text-sm text-gray-500 mt-1">{t('towardsTarget')}</p>
           </CardContent>
         </Card>
       </div>

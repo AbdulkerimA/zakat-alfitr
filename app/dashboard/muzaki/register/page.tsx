@@ -9,6 +9,7 @@ import { db } from '@/lib/firebase/config';
 import { collection, addDoc } from 'firebase/firestore';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMasjid } from '@/contexts/MasjidContext';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -41,6 +42,7 @@ const formSchema = z.object({
 });
 
 export default function MuzakiRegisterPage() {
+  const t = useTranslations();
   const router = useRouter();
   const { user, masjidId } = useAuth();
   const { config } = useMasjid();
@@ -71,7 +73,7 @@ export default function MuzakiRegisterPage() {
 
   const onSubmit = async (values: any) => {
     if (!masjidId || !user) {
-      toast.error('You must be logged in');
+      toast.error(t('common.loading'));
       return;
     }
 
@@ -87,10 +89,10 @@ export default function MuzakiRegisterPage() {
         registeredAt: new Date(),
       });
 
-      toast.success('Muzaki registered successfully');
+      toast.success(t('muzaki.registerSuccess'));
       router.push('/dashboard/muzaki');
     } catch (error: any) {
-      toast.error(error.message || 'Registration failed');
+      toast.error(error.message);
     } finally {
       setLoading(false);
     }
@@ -100,13 +102,13 @@ export default function MuzakiRegisterPage() {
     <div className="max-w-2xl mx-auto">
       <div className="mb-6">
         <Link href="/dashboard" className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1">
-          <ArrowLeft className="h-4 w-4" /> Back to Dashboard
+          <ArrowLeft className="h-4 w-4" /> {t('mesakin.backToDashboard')}
         </Link>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Register Muzaki (Donors)</CardTitle>
+          <CardTitle>{t('muzaki.register')}</CardTitle>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -116,9 +118,9 @@ export default function MuzakiRegisterPage() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Full Name</FormLabel>
+                    <FormLabel>{t('muzaki.name')}</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter full name" {...field} />
+                      <Input placeholder={t('form.enterFullName')} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -130,7 +132,7 @@ export default function MuzakiRegisterPage() {
                   name="peopleCount"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Number of People</FormLabel>
+                      <FormLabel>{t('muzaki.numberOfPeople')}</FormLabel>
                       <FormControl>
                         <Input type="number" min="1" {...field} />
                       </FormControl>
@@ -143,7 +145,7 @@ export default function MuzakiRegisterPage() {
                     name="totalPayed"
                     render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Payed Amount</FormLabel>
+                      <FormLabel>{t('muzaki.payedAmount')}</FormLabel>
                       <FormControl>
                       <Input
                         placeholder="0"
@@ -172,9 +174,9 @@ export default function MuzakiRegisterPage() {
                     name="Change"
                     render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Change</FormLabel>
+                      <FormLabel>{t('muzaki.change')}</FormLabel>
                       <FormControl>
-                        <Input type="number" placeholder="change" {...field} disabled/>
+                        <Input type="number" placeholder={t('muzaki.change')} {...field} disabled/>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -186,7 +188,7 @@ export default function MuzakiRegisterPage() {
                     name="extra"
                     render={({ field }) => (
                     <FormItem>
-                      <FormLabel>extra amount</FormLabel>
+                      <FormLabel>{t('muzaki.extraAmount')}</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -211,17 +213,17 @@ export default function MuzakiRegisterPage() {
                   name="paymentMethod"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Payment Method</FormLabel>
+                      <FormLabel>{t('muzaki.paymentMethod')}</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select method" />
+                            <SelectValue placeholder={t('muzaki.selectMethod')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="cash">Cash</SelectItem>
-                          <SelectItem value="bank">Bank Transfer</SelectItem>
-                          <SelectItem value="online">Online</SelectItem>
+                          <SelectItem value="cash">{t('muzaki.cash')}</SelectItem>
+                          <SelectItem value="bank">{t('muzaki.bank')}</SelectItem>
+                          <SelectItem value="online">{t('muzaki.online')}</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -232,17 +234,17 @@ export default function MuzakiRegisterPage() {
 
               <div className="bg-green-50 p-4 rounded-lg">
                 <div className="flex justify-between items-center">
-                  <span className="font-medium">Amount per person:</span>
+                  <span className="font-medium">{t('muzaki.amountPerPerson')}:</span>
                   <span>ETB {config?.zakatAmount || 10}</span>
                 </div>
                 <div className="flex justify-between items-center text-lg font-bold mt-2">
-                  <span>Total Amount:</span>
+                  <span>{t('muzaki.totalAmount')}:</span>
                   <span className="text-green-700">ETB {total}</span>
                 </div>
               </div>
 
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? 'Registering...' : 'Register Muzaki'}
+                {loading ? t('muzaki.registering') : t('muzaki.registerMuzaki')}
               </Button>
             </form>
           </Form>

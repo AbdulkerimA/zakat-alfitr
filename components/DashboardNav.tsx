@@ -12,19 +12,20 @@ import {
   Package,
   List,
 } from 'lucide-react';
-
-const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/dashboard/mesakin/register', label: 'Register Mesakin', icon: UserPlus },
-  { href: '/dashboard/muzaki/register', label: 'Register Muzaki', icon: HandCoins },
-  { href: '/dashboard/mesakin', label: 'Mesakin List', icon: Users },
-  { href: '/dashboard/muzaki', label: 'Muzaki List', icon: List },
-  // { href: '/dashboard/distributions', label: 'Distributions', icon: Package },
-  { href: '/dashboard/config', label: 'Settings', icon: Settings },
-];
+import { useTranslations } from 'next-intl';
 
 export function DashboardNav() {
   const pathname = usePathname();
+  const t = useTranslations('nav');
+
+  const navItems = [
+    { href: '/dashboard', label: t('dashboard'), icon: LayoutDashboard },
+    { href: '/dashboard/mesakin/register', label: t('registerMesakin'), icon: UserPlus },
+    { href: '/dashboard/muzaki/register', label: t('registerMuzaki'), icon: HandCoins },
+    { href: '/dashboard/mesakin', label: t('mesakinList'), icon: Users },
+    { href: '/dashboard/muzaki', label: t('muzakiList'), icon: List },
+    { href: '/dashboard/config', label: t('settings'), icon: Settings },
+  ];
 
   return (
     <aside className="fixed bottom-4 md:bg-white left-1/2 -translate-x-1/2 shadow-lg md:static md:translate-x-0 md:w-64 md:min-h-[calc(100vh-4rem)] z-50">

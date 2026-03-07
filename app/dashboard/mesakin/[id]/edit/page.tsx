@@ -21,6 +21,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { ArrowLeft } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 const formSchema = z.object({
   name: z.string().min(2, 'Name is required'),
@@ -34,6 +35,9 @@ const formSchema = z.object({
 export default function EditMesakinPage() {
   const router = useRouter();
   const params = useParams();
+  const t = useTranslations('mesakin');
+  const tForm = useTranslations('form');
+  const tCommon = useTranslations('common');
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
 
@@ -66,7 +70,7 @@ export default function EditMesakinPage() {
             notes: data.notes || '',
           });
         } else {
-          toast.error('Mesakin not found');
+          toast.error(t('notFound'));
           router.push('/dashboard/mesakin');
         }
       } catch (error) {
@@ -88,7 +92,7 @@ export default function EditMesakinPage() {
         updatedAt: new Date(),
       });
 
-      toast.success('Mesakin updated successfully');
+      toast.success(t('updateSuccess'));
       router.push('/dashboard/mesakin');
     } catch (error: any) {
       toast.error(error.message || 'Update failed');
@@ -113,12 +117,12 @@ export default function EditMesakinPage() {
         className="mb-4"
       >
         <ArrowLeft className="h-4 w-4 mr-2" />
-        Back to List
+        {t('backToList')}
       </Button>
 
       <Card>
         <CardHeader>
-          <CardTitle>Edit Mesakin</CardTitle>
+          <CardTitle>{t('edit')}</CardTitle>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -128,9 +132,9 @@ export default function EditMesakinPage() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Full Name</FormLabel>
+                    <FormLabel>{t('name')}</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter full name" {...field} />
+                      <Input placeholder={tForm('enterFullName')} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -143,9 +147,9 @@ export default function EditMesakinPage() {
                   name="phone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Phone Number</FormLabel>
+                      <FormLabel>{t('phone')}</FormLabel>
                       <FormControl>
-                        <Input placeholder="Phone number" {...field} />
+                        <Input placeholder={tForm('phoneNumber')} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -157,7 +161,7 @@ export default function EditMesakinPage() {
                   name="familyMembers"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Family Members</FormLabel>
+                      <FormLabel>{t('familyMembers')}</FormLabel>
                       <FormControl>
                         <Input type="number" min="1" {...field} />
                       </FormControl>
@@ -172,9 +176,9 @@ export default function EditMesakinPage() {
                 name="idNumber"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Identification Number</FormLabel>
+                    <FormLabel>{t('idNumber')}</FormLabel>
                     <FormControl>
-                      <Input placeholder="identification number of FAN" {...field} />
+                      <Input placeholder={tForm('idNumberPlaceholder')} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -186,9 +190,9 @@ export default function EditMesakinPage() {
                 name="address"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Address</FormLabel>
+                    <FormLabel>{t('address')}</FormLabel>
                     <FormControl>
-                      <Input placeholder="Full address" {...field} />
+                      <Input placeholder={tForm('fullAddress')} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -200,10 +204,10 @@ export default function EditMesakinPage() {
                 name="notes"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Additional Notes (optional)</FormLabel>
+                    <FormLabel>{t('notes')}</FormLabel>
                     <FormControl>
                       <Textarea 
-                        placeholder="Any additional information..."
+                        placeholder={tForm('additionalInfo')}
                         className="min-h-25"
                         {...field}
                       />
@@ -215,10 +219,10 @@ export default function EditMesakinPage() {
 
               <div className="flex gap-2">
                 <Button type="submit" className="flex-1" disabled={loading}>
-                  {loading ? 'Updating...' : 'Update Mesakin'}
+                  {loading ? tForm('updating') : tForm('update')}
                 </Button>
                 <Button type="button" variant="outline" onClick={() => router.push('/dashboard/mesakin')}>
-                  Cancel
+                  {tCommon('cancel')}
                 </Button>
               </div>
             </form>

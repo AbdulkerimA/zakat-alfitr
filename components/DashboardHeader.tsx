@@ -14,17 +14,19 @@ import {
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { LogOut } from 'lucide-react';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { useTranslations } from 'next-intl';
 
 export function DashboardHeader() {
   const { user, logout } = useAuth();
   const { masjid } = useMasjid();
+  const t = useTranslations('common');
 
   const initials = user?.email?.charAt(0).toUpperCase() || 'U';
 
   return (
     <header className="bg-white border-b h-14 md:h-16 flex items-center justify-between px-4 md:px-6">
       <div className="flex items-center gap-2">
-        <h1 className="font-semibold text-base md:text-lg truncate">{masjid?.name || 'Loading...'}</h1>
+        <h1 className="font-semibold text-base md:text-lg truncate">{masjid?.name || t('loading')}</h1>
       </div>
 
       <div className="flex items-center gap-2">
@@ -50,7 +52,7 @@ export function DashboardHeader() {
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => logout()}>
             <LogOut className="mr-2 h-4 w-4" />
-            Logout
+            {t('logout')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

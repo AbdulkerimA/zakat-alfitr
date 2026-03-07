@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 
 interface MesakinDetails {
   id: string;
@@ -26,6 +27,7 @@ interface MesakinDetails {
 export default function MesakinDetailsPage() {
   const router = useRouter();
   const params = useParams();
+  const t = useTranslations('mesakin');
   const [mesakin, setMesakin] = useState<MesakinDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
@@ -57,7 +59,7 @@ export default function MesakinDetailsPage() {
         updatedAt: new Date(),
       });
       setMesakin(prev => prev ? { ...prev, status: newStatus } : null);
-      toast.success(`Status updated to ${newStatus}`);
+      toast.success(`${t('statusUpdated')} ${newStatus}`);
     } catch (error) {
       toast.error('Failed to update status');
     } finally {
@@ -76,9 +78,9 @@ export default function MesakinDetailsPage() {
   if (!mesakin) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500">Mesakin not found</p>
+        <p className="text-gray-500">{t('notFound')}</p>
         <Button onClick={() => router.push('/dashboard/mesakin')} className="mt-4">
-          Back to List
+          {t('backToList')}
         </Button>
       </div>
     );
@@ -101,7 +103,7 @@ export default function MesakinDetailsPage() {
         className="mb-4"
       >
         <ArrowLeft className="h-4 w-4 mr-2" />
-        Back to List
+        {t('backToList')}
       </Button>
 
       <Card>
@@ -114,19 +116,19 @@ export default function MesakinDetailsPage() {
         <CardContent className="space-y-4">
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <p className="text-sm text-gray-500">Phone Number</p>
+              <p className="text-sm text-gray-500">{t('phone')}</p>
               <p className="font-medium">{mesakin.phone}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">ID Number</p>
+              <p className="text-sm text-gray-500">{t('idNumber')}</p>
               <p className="font-medium">{mesakin.idNumber}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">Family Members</p>
+              <p className="text-sm text-gray-500">{t('familyMembers')}</p>
               <p className="font-medium">{mesakin.familyMembers}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">Registered Date</p>
+              <p className="text-sm text-gray-500">{t('registeredDate')}</p>
               <p className="font-medium">
                 {mesakin.registeredAt?.toDate ? format(mesakin.registeredAt.toDate(), 'MMM dd, yyyy') : 'N/A'}
               </p>
@@ -134,19 +136,19 @@ export default function MesakinDetailsPage() {
           </div>
 
           <div>
-            <p className="text-sm text-gray-500">Address</p>
+            <p className="text-sm text-gray-500">{t('address')}</p>
             <p className="font-medium">{mesakin.address}</p>
           </div>
 
           {mesakin.notes && (
             <div>
-              <p className="text-sm text-gray-500">Notes</p>
+              <p className="text-sm text-gray-500">{t('notes')}</p>
               <p className="font-medium">{mesakin.notes}</p>
             </div>
           )}
 
           <div className="pt-4 border-t">
-            <p className="text-sm text-gray-500 mb-3">Update Status</p>
+            <p className="text-sm text-gray-500 mb-3">{t('updateStatus')}</p>
             <div className="flex flex-wrap gap-2">
               <Button
                 size="sm"
@@ -154,7 +156,7 @@ export default function MesakinDetailsPage() {
                 onClick={() => updateStatus('pending')}
                 disabled={updating || mesakin.status === 'pending'}
               >
-                Pending
+                {t('pending')}
               </Button>
               <Button
                 size="sm"
@@ -163,7 +165,7 @@ export default function MesakinDetailsPage() {
                 disabled={updating || mesakin.status === 'approved'}
                 className={mesakin.status === 'approved' ? 'bg-green-600 hover:bg-green-700' : ''}
               >
-                Approved
+                {t('approved')}
               </Button>
               <Button
                 size="sm"
@@ -172,7 +174,7 @@ export default function MesakinDetailsPage() {
                 disabled={updating || mesakin.status === 'received'}
                 className={mesakin.status === 'received' ? 'bg-blue-600 hover:bg-blue-700' : ''}
               >
-                Received
+                {t('received')}
               </Button>
             </div>
           </div>

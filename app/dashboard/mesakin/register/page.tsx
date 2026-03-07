@@ -30,6 +30,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 const formSchema = z.object({
   name: z.string().min(2, 'Name is required'),
@@ -43,6 +44,9 @@ const formSchema = z.object({
 export default function MesakinRegisterPage() {
   const router = useRouter();
   const { user, masjidId } = useAuth();
+  const t = useTranslations('mesakin');
+  const tForm = useTranslations('form');
+  const tCommon = useTranslations('common');
   const [loading, setLoading] = useState(false);
 
   const form = useForm({
@@ -73,7 +77,7 @@ export default function MesakinRegisterPage() {
       const phoneSnapshot = await getDocs(phoneQuery);
       
       if (!phoneSnapshot.empty) {
-        toast.error('Phone number already registered');
+        toast.error(t('phoneExists'));
         setLoading(false);
         return;
       }
@@ -86,7 +90,7 @@ export default function MesakinRegisterPage() {
       const idSnapshot = await getDocs(idQuery);
       
       if (!idSnapshot.empty) {
-        toast.error('ID number already registered');
+        toast.error(t('idExists'));
         setLoading(false);
         return;
       }
@@ -100,7 +104,7 @@ export default function MesakinRegisterPage() {
         registeredAt: new Date(),
       });
 
-      toast.success('Mesakin registered successfully');
+      toast.success(t('registerSuccess'));
       router.push('/dashboard/mesakin');
     } catch (error: any) {
       toast.error(error.message || 'Registration failed');
@@ -113,13 +117,13 @@ export default function MesakinRegisterPage() {
     <div className="max-w-2xl mx-auto">
       <div className="mb-6">
         <Link href="/dashboard" className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1">
-          <ArrowLeft className="h-4 w-4" /> Back to Dashboard
+          <ArrowLeft className="h-4 w-4" /> {t('backToDashboard')}
         </Link>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Register Mesakin (Recipients)</CardTitle>
+          <CardTitle>{t('register')}</CardTitle>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -129,9 +133,9 @@ export default function MesakinRegisterPage() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Full Name</FormLabel>
+                    <FormLabel>{t('name')}</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter full name" {...field} />
+                      <Input placeholder={tForm('enterFullName')} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -144,9 +148,9 @@ export default function MesakinRegisterPage() {
                   name="phone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Phone Number</FormLabel>
+                      <FormLabel>{t('phone')}</FormLabel>
                       <FormControl>
-                        <Input placeholder="Phone number" {...field} />
+                        <Input placeholder={tForm('phoneNumber')} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -158,7 +162,7 @@ export default function MesakinRegisterPage() {
                   name="familyMembers"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Family Members</FormLabel>
+                      <FormLabel>{t('familyMembers')}</FormLabel>
                       <FormControl>
                         <Input type="number" min="1" {...field} />
                       </FormControl>
@@ -173,9 +177,9 @@ export default function MesakinRegisterPage() {
                 name="idNumber"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Identification Number</FormLabel>
+                    <FormLabel>{t('idNumber')}</FormLabel>
                     <FormControl>
-                      <Input placeholder="identification number of FAN" {...field} />
+                      <Input placeholder={tForm('idNumberPlaceholder')} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -187,9 +191,9 @@ export default function MesakinRegisterPage() {
                 name="address"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Address</FormLabel>
+                    <FormLabel>{t('address')}</FormLabel>
                     <FormControl>
-                      <Input placeholder="Full address" {...field} />
+                      <Input placeholder={tForm('fullAddress')} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -201,10 +205,10 @@ export default function MesakinRegisterPage() {
                 name="notes"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Additional Notes (optional)</FormLabel>
+                    <FormLabel>{t('notes')}</FormLabel>
                     <FormControl>
                       <Textarea 
-                        placeholder="Any additional information..."
+                        placeholder={tForm('additionalInfo')}
                         className="min-h-25"
                         {...field}
                       />
@@ -215,7 +219,7 @@ export default function MesakinRegisterPage() {
               />
 
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? 'Registering...' : 'Register Mesakin'}
+                {loading ? tForm('registering') : t('register')}
               </Button>
             </form>
           </Form>

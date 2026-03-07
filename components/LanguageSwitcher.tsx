@@ -21,6 +21,7 @@ export function LanguageSwitcher() {
 
   const changeLanguage = (locale: string) => {
     document.cookie = `locale=${locale}; path=/; max-age=31536000`;
+    window.dispatchEvent(new Event('languageChange'));
     router.refresh();
   };
 

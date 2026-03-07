@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { format } from 'date-fns';
 import { LayoutGrid, TableIcon, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface Muzaki {
   id: string;
@@ -33,6 +34,8 @@ interface Muzaki {
 
 export default function MuzakiPage() {
   const { masjidId } = useAuth();
+  const t = useTranslations('muzaki');
+  const tPagination = useTranslations('pagination');
   const [muzaki, setMuzaki] = useState<Muzaki[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalCollected, setTotalCollected] = useState(0);
@@ -105,7 +108,7 @@ export default function MuzakiPage() {
   return (
     <div className="space-y-4 md:space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl md:text-3xl font-bold">Muzaki List</h1>
+        <h1 className="text-2xl md:text-3xl font-bold">{t('title')}</h1>
         <div className="hidden md:flex gap-2">
           <Button
             variant={viewMode === 'card' ? 'default' : 'outline'}
@@ -127,9 +130,9 @@ export default function MuzakiPage() {
       <Card className="bg-green-50">
         <CardContent className="pt-6">
           <div className="text-2xl font-bold text-green-700">
-            Total Collected: {totalCollected} ETB
+            {t('totalCollected')}: {totalCollected} ETB
           </div>
-          <p className="text-sm text-gray-600">From {muzaki.length} donors</p>
+          <p className="text-sm text-gray-600">{t('fromDonors', { count: muzaki.length })}</p>
         </CardContent>
       </Card>
 
@@ -137,7 +140,7 @@ export default function MuzakiPage() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
-            placeholder="Search by name, phone, or email..."
+            placeholder={t('searchPlaceholder')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-9"
@@ -150,7 +153,7 @@ export default function MuzakiPage() {
         >
           {statuses.map(status => (
             <option key={status} value={status}>
-              {status === 'all' ? 'All Status' : status}
+              {status === 'all' ? t('allStatus') : status}
             </option>
           ))}
         </select>
@@ -159,16 +162,16 @@ export default function MuzakiPage() {
           onChange={(e) => setSortBy(e.target.value as 'name' | 'date-desc' | 'date-asc')}
           className="px-3 py-2 border rounded-md bg-white text-sm"
         >
-          <option value="date-desc">Date (Newest)</option>
-          <option value="date-asc">Date (Oldest)</option>
-          <option value="name">Name (A-Z)</option>
+          <option value="date-desc">{t('sortByDateNewest')}</option>
+          <option value="date-asc">{t('sortByDateOldest')}</option>
+          <option value="name">{t('sortByName')}</option>
         </select>
       </div>
 
       {filteredMuzaki.length === 0 ? (
         <Card>
           <CardContent className="py-8">
-            <p className="text-center text-gray-500">No muzaki registered yet</p>
+            <p className="text-center text-gray-500">{t('noRecords')}</p>
           </CardContent>
         </Card>
       ) : viewMode === 'table' ? (
@@ -177,13 +180,13 @@ export default function MuzakiPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>People</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Date</TableHead>
+                  <TableHead>{t('name')}</TableHead>
+                  <TableHead>{t('phone')}</TableHead>
+                  <TableHead>{t('email')}</TableHead>
+                  <TableHead>{t('people')}</TableHead>
+                  <TableHead>{t('amount')}</TableHead>
+                  <TableHead>{t('status')}</TableHead>
+                  <TableHead>{t('date')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -213,19 +216,19 @@ export default function MuzakiPage() {
               </CardHeader>
               <CardContent className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">People Count:</span>
+                  <span className="text-gray-500">{t('peopleCount')}:</span>
                   <span className="font-medium">{m.peopleCount}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Amount:</span>
+                  <span className="text-gray-500">{t('amount')}:</span>
                   <span className="font-bold text-green-600">ETB {m.amount + m.extra}</span>
                 </div>
                 <div className="flex justify-between text-sm items-center">
-                  <span className="text-gray-500">Status:</span>
+                  <span className="text-gray-500">{t('status')}:</span>
                   <Badge className="bg-green-100 text-green-800">{m.paymentStatus}</Badge>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Date:</span>
+                  <span className="text-gray-500">{t('date')}:</span>
                   <span className="font-medium">
                     {m.registeredAt?.toDate ? format(m.registeredAt.toDate(), 'MMM dd, yyyy') : 'N/A'}
                   </span>
@@ -239,7 +242,7 @@ export default function MuzakiPage() {
       {filteredMuzaki.length > 0 && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-gray-600">
-            Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredMuzaki.length)} of {filteredMuzaki.length}
+            {tPagination('showing', { start: startIndex + 1, end: Math.min(startIndex + itemsPerPage, filteredMuzaki.length), total: filteredMuzaki.length })}
           </p>
           <div className="flex gap-2">
             <Button

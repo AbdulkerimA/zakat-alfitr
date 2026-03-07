@@ -20,6 +20,7 @@ import { format } from 'date-fns';
 import { LayoutGrid, TableIcon, Search, ChevronLeft, ChevronRight, Eye, Edit, Trash2, ArrowUpDown } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -44,6 +45,9 @@ interface Mesakin {
 export default function MesakinPage() {
   const router = useRouter();
   const { masjidId } = useAuth();
+  const t = useTranslations('mesakin');
+  const tCommon = useTranslations('common');
+  const tPagination = useTranslations('pagination');
   const [mesakin, setMesakin] = useState<Mesakin[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'card' | 'table'>('card');
@@ -85,7 +89,7 @@ export default function MesakinPage() {
     try {
       await deleteDoc(doc(db, 'mesakin', deleteId));
       setMesakin(mesakin.filter(m => m.id !== deleteId));
-      toast.success('Mesakin deleted successfully');
+      toast.success(t('deleteSuccess'));
       setDeleteId(null);
     } catch (error) {
       toast.error('Failed to delete mesakin');
@@ -135,7 +139,7 @@ export default function MesakinPage() {
   return (
     <div className="space-y-4 md:space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl md:text-3xl font-bold">Mesakin List</h1>
+        <h1 className="text-2xl md:text-3xl font-bold">{t('title')}</h1>
         <div className="hidden md:flex gap-2">
           <Button
             variant={viewMode === 'card' ? 'default' : 'outline'}
@@ -158,7 +162,7 @@ export default function MesakinPage() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
-            placeholder="Search by name or phone..."
+            placeholder={t('searchPlaceholder')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-9"
@@ -171,7 +175,7 @@ export default function MesakinPage() {
         >
           {statuses.map(status => (
             <option key={status} value={status}>
-              {status === 'all' ? 'All Status' : status}
+              {status === 'all' ? t('allStatus') : status}
             </option>
           ))}
         </select>
@@ -180,16 +184,16 @@ export default function MesakinPage() {
           onChange={(e) => setSortBy(e.target.value as 'name' | 'date-desc' | 'date-asc')}
           className="px-3 py-2 border rounded-md bg-white text-sm"
         >
-          <option value="date-desc">Date (Newest)</option>
-          <option value="date-asc">Date (Oldest)</option>
-          <option value="name">Name (A-Z)</option>
+          <option value="date-desc">{t('sortByDateNewest')}</option>
+          <option value="date-asc">{t('sortByDateOldest')}</option>
+          <option value="name">{t('sortByName')}</option>
         </select>
       </div>
 
       {filteredMesakin.length === 0 ? (
         <Card>
           <CardContent className="py-8">
-            <p className="text-center text-gray-500">No mesakin registered yet</p>
+            <p className="text-center text-gray-500">{t('noRecords')}</p>
           </CardContent>
         </Card>
       ) : viewMode === 'table' ? (
@@ -198,13 +202,13 @@ export default function MesakinPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead>Family</TableHead>
-                  <TableHead>ID Number</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Registered</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead>{t('name')}</TableHead>
+                  <TableHead>{t('phone')}</TableHead>
+                  <TableHead>{t('family')}</TableHead>
+                  <TableHead>{t('idNumber')}</TableHead>
+                  <TableHead>{t('status')}</TableHead>
+                  <TableHead>{t('registered')}</TableHead>
+                  <TableHead>{tCommon('actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -248,30 +252,30 @@ export default function MesakinPage() {
               </CardHeader>
               <CardContent className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Phone:</span>
+                  <span className="text-gray-500">{t('phone')}:</span>
                   <span className="font-medium">{m.phone}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Family Members:</span>
+                  <span className="text-gray-500">{t('familyMembers')}:</span>
                   <span className="font-medium">{m.familyMembers}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">ID Number:</span>
+                  <span className="text-gray-500">{t('idNumber')}:</span>
                   <span className="font-medium capitalize">{m.idNumber}</span>
                 </div>
                 <div className="flex justify-between text-sm items-center">
-                  <span className="text-gray-500">Status:</span>
+                  <span className="text-gray-500">{t('status')}:</span>
                   <Badge className={getStatusBadge(m.status)}>{m.status}</Badge>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Registered:</span>
+                  <span className="text-gray-500">{t('registered')}:</span>
                   <span className="font-medium">
                     {m.registeredAt?.toDate ? format(m.registeredAt.toDate(), 'MMM dd, yyyy') : 'N/A'}
                   </span>
                 </div>
                 <div className="flex gap-2 pt-2">
                   <Button size="sm" variant="outline" className="flex-1" onClick={() => router.push(`/dashboard/mesakin/${m.id}`)}>
-                    <Eye className="h-4 w-4 mr-1" /> View
+                    <Eye className="h-4 w-4 mr-1" /> {tCommon('view')}
                   </Button>
                   <Button size="sm" variant="outline" onClick={() => router.push(`/dashboard/mesakin/${m.id}/edit`)}>
                     <Edit className="h-4 w-4" />
@@ -289,7 +293,7 @@ export default function MesakinPage() {
       {filteredMesakin.length > 0 && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-gray-600">
-            Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredMesakin.length)} of {filteredMesakin.length}
+            {tPagination('showing', { start: startIndex + 1, end: Math.min(startIndex + itemsPerPage, filteredMesakin.length), total: filteredMesakin.length })}
           </p>
           <div className="flex gap-2">
             <Button
@@ -316,15 +320,15 @@ export default function MesakinPage() {
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t('deleteConfirm')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the mesakin record.
+              {t('deleteMessage')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{tCommon('cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
-              Delete
+              {tCommon('delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
