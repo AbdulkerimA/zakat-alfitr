@@ -3,12 +3,13 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { db } from '@/lib/firebase/config';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { format } from 'date-fns';
+import { toast } from 'sonner';
 
 interface MesakinDetails {
   id: string;
@@ -27,6 +28,7 @@ export default function MesakinDetailsPage() {
   const params = useParams();
   const [mesakin, setMesakin] = useState<MesakinDetails | null>(null);
   const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
     const fetchMesakin = async () => {
@@ -46,6 +48,22 @@ export default function MesakinDetailsPage() {
 
     fetchMesakin();
   }, [params.id]);
+
+  const updateStatus = async (newStatus: string) => {
+    setUpdating(true);
+    try {
+      await updateDoc(doc(db, 'mesakin', params.id as string), {
+        status: newStatus,
+        updatedAt: new Date(),
+      });
+      setMesakin(prev => prev ? { ...prev, status: newStatus } : null);
+      toast.success(`Status updated to ${newStatus}`);
+    } catch (error) {
+      toast.error('Failed to update status');
+    } finally {
+      setUpdating(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -126,6 +144,38 @@ export default function MesakinDetailsPage() {
               <p className="font-medium">{mesakin.notes}</p>
             </div>
           )}
+
+          <div className="pt-4 border-t">
+            <p className="text-sm text-gray-500 mb-3">Update Status</p>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                size="sm"
+                variant={mesakin.status === 'pending' ? 'default' : 'outline'}
+                onClick={() => updateStatus('pending')}
+                disabled={updating || mesakin.status === 'pending'}
+              >
+                Pending
+              </Button>
+              <Button
+                size="sm"
+                variant={mesakin.status === 'approved' ? 'default' : 'outline'}
+                onClick={() => updateStatus('approved')}
+                disabled={updating || mesakin.status === 'approved'}
+                className={mesakin.status === 'approved' ? 'bg-green-600 hover:bg-green-700' : ''}
+              >
+                Approved
+              </Button>
+              <Button
+                size="sm"
+                variant={mesakin.status === 'received' ? 'default' : 'outline'}
+                onClick={() => updateStatus('received')}
+                disabled={updating || mesakin.status === 'received'}
+                className={mesakin.status === 'received' ? 'bg-blue-600 hover:bg-blue-700' : ''}
+              >
+                Received
+              </Button>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>
