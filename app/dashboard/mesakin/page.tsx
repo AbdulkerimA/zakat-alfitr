@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { db } from '@/lib/firebase/config';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   Table,
@@ -17,7 +17,19 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { format } from 'date-fns';
-import { LayoutGrid, TableIcon, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LayoutGrid, TableIcon, Search, ChevronLeft, ChevronRight, Eye, Edit, Trash2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface Mesakin {
   id: string;
@@ -30,6 +42,7 @@ interface Mesakin {
 }
 
 export default function MesakinPage() {
+  const router = useRouter();
   const { masjidId } = useAuth();
   const [mesakin, setMesakin] = useState<Mesakin[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,6 +51,7 @@ export default function MesakinPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 9;
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchMesakin = async () => {
@@ -64,6 +78,18 @@ export default function MesakinPage() {
 
     fetchMesakin();
   }, [masjidId]);
+
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    try {
+      await deleteDoc(doc(db, 'mesakin', deleteId));
+      setMesakin(mesakin.filter(m => m.id !== deleteId));
+      toast.success('Mesakin deleted successfully');
+      setDeleteId(null);
+    } catch (error) {
+      toast.error('Failed to delete mesakin');
+    }
+  };
 
   if (loading) {
     return (
@@ -155,14 +181,15 @@ export default function MesakinPage() {
                   <TableHead>Name</TableHead>
                   <TableHead>Phone</TableHead>
                   <TableHead>Family</TableHead>
-                  <TableHead>Income Level</TableHead>
+                  <TableHead>ID Number</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Registered</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {paginatedMesakin.map((m) => (
-                  <TableRow key={m.id}>
+                  <TableRow key={m.id} className="hover:bg-gray-50">
                     <TableCell className="font-medium">{m.name}</TableCell>
                     <TableCell>{m.phone}</TableCell>
                     <TableCell>{m.familyMembers}</TableCell>
@@ -173,6 +200,19 @@ export default function MesakinPage() {
                     <TableCell>
                       {m.registeredAt?.toDate ? format(m.registeredAt.toDate(), 'MMM dd, yyyy') : 'N/A'}
                     </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="ghost" onClick={() => router.push(`/dashboard/mesakin/${m.id}`)}>
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={() => router.push(`/dashboard/mesakin/${m.id}/edit`)}>
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={() => setDeleteId(m.id)}>
+                          <Trash2 className="h-4 w-4 text-red-600" />
+                        </Button>
+                      </div>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -182,7 +222,7 @@ export default function MesakinPage() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {paginatedMesakin.map((m) => (
-            <Card key={m.id}>
+            <Card key={m.id} className="hover:shadow-lg transition-shadow">
               <CardHeader>
                 <CardTitle className="text-lg">{m.name}</CardTitle>
               </CardHeader>
@@ -208,6 +248,17 @@ export default function MesakinPage() {
                   <span className="font-medium">
                     {m.registeredAt?.toDate ? format(m.registeredAt.toDate(), 'MMM dd, yyyy') : 'N/A'}
                   </span>
+                </div>
+                <div className="flex gap-2 pt-2">
+                  <Button size="sm" variant="outline" className="flex-1" onClick={() => router.push(`/dashboard/mesakin/${m.id}`)}>
+                    <Eye className="h-4 w-4 mr-1" /> View
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => router.push(`/dashboard/mesakin/${m.id}/edit`)}>
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => setDeleteId(m.id)}>
+                    <Trash2 className="h-4 w-4 text-red-600" />
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -241,6 +292,23 @@ export default function MesakinPage() {
           </div>
         </div>
       )}
+
+      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the mesakin record.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
