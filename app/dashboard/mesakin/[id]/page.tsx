@@ -1,0 +1,133 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useRouter, useParams } from 'next/navigation';
+import { db } from '@/lib/firebase/config';
+import { doc, getDoc } from 'firebase/firestore';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
+import { format } from 'date-fns';
+
+interface MesakinDetails {
+  id: string;
+  name: string;
+  phone: string;
+  address: string;
+  idNumber: string;
+  familyMembers: number;
+  notes?: string;
+  status: string;
+  registeredAt: any;
+}
+
+export default function MesakinDetailsPage() {
+  const router = useRouter();
+  const params = useParams();
+  const [mesakin, setMesakin] = useState<MesakinDetails | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchMesakin = async () => {
+      try {
+        const docRef = doc(db, 'mesakin', params.id as string);
+        const docSnap = await getDoc(docRef);
+        
+        if (docSnap.exists()) {
+          setMesakin({ id: docSnap.id, ...docSnap.data() } as MesakinDetails);
+        }
+      } catch (error) {
+        console.error('Error fetching mesakin:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMesakin();
+  }, [params.id]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+      </div>
+    );
+  }
+
+  if (!mesakin) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-500">Mesakin not found</p>
+        <Button onClick={() => router.push('/dashboard/mesakin')} className="mt-4">
+          Back to List
+        </Button>
+      </div>
+    );
+  }
+
+  const getStatusBadge = (status: string) => {
+    const colors = {
+      pending: 'bg-yellow-100 text-yellow-800',
+      approved: 'bg-green-100 text-green-800',
+      received: 'bg-blue-100 text-blue-800',
+    };
+    return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-800';
+  };
+
+  return (
+    <div className="max-w-3xl mx-auto space-y-4">
+      <Button
+        variant="ghost"
+        onClick={() => router.push('/dashboard/mesakin')}
+        className="mb-4"
+      >
+        <ArrowLeft className="h-4 w-4 mr-2" />
+        Back to List
+      </Button>
+
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-start">
+            <CardTitle className="text-2xl">{mesakin.name}</CardTitle>
+            <Badge className={getStatusBadge(mesakin.status)}>{mesakin.status}</Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm text-gray-500">Phone Number</p>
+              <p className="font-medium">{mesakin.phone}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">ID Number</p>
+              <p className="font-medium">{mesakin.idNumber}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Family Members</p>
+              <p className="font-medium">{mesakin.familyMembers}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Registered Date</p>
+              <p className="font-medium">
+                {mesakin.registeredAt?.toDate ? format(mesakin.registeredAt.toDate(), 'MMM dd, yyyy') : 'N/A'}
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <p className="text-sm text-gray-500">Address</p>
+            <p className="font-medium">{mesakin.address}</p>
+          </div>
+
+          {mesakin.notes && (
+            <div>
+              <p className="text-sm text-gray-500">Notes</p>
+              <p className="font-medium">{mesakin.notes}</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
