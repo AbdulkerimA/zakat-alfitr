@@ -166,7 +166,7 @@ export default function MesakinPage() {
                     <TableCell className="font-medium">{m.name}</TableCell>
                     <TableCell>{m.phone}</TableCell>
                     <TableCell>{m.familyMembers}</TableCell>
-                    <TableCell className="capitalize">{m.idNumber.replace('_', ' ')}</TableCell>
+                    <TableCell className="capitalize">{m.idNumber}</TableCell>
                     <TableCell>
                       <Badge className={getStatusBadge(m.status)}>{m.status}</Badge>
                     </TableCell>
