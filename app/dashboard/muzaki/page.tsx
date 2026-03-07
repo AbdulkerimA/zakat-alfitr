@@ -116,7 +116,7 @@ export default function MuzakiPage() {
       <Card className="bg-green-50">
         <CardContent className="pt-6">
           <div className="text-2xl font-bold text-green-700">
-            Total Collected: ${totalCollected}
+            Total Collected: {totalCollected} ETB
           </div>
           <p className="text-sm text-gray-600">From {muzaki.length} donors</p>
         </CardContent>

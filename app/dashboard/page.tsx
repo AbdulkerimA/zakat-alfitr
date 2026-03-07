@@ -95,7 +95,7 @@ export default function DashboardPage() {
     },
     {
       title: 'Total Collected',
-      value: `$${stats.totalCollected}`,
+      value: `${stats.totalCollected} ETB`,
       icon: Wallet,
       desc: 'From donations',
     },
