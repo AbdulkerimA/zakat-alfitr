@@ -12,7 +12,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { LogOut, User } from 'lucide-react';
+import { LogOut } from 'lucide-react';
+import { LanguageSwitcher } from './LanguageSwitcher';
 
 export function DashboardHeader() {
   const { user, logout } = useAuth();
@@ -26,7 +27,10 @@ export function DashboardHeader() {
         <h1 className="font-semibold text-base md:text-lg truncate">{masjid?.name || 'Loading...'}</h1>
       </div>
 
-      <DropdownMenu>
+      <div className="flex items-center gap-2">
+        <LanguageSwitcher />
+
+        <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-8 w-8 rounded-full">
             <Avatar className="h-8 w-8">
@@ -50,6 +54,7 @@ export function DashboardHeader() {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+      </div>
     </header>
   );
 }
