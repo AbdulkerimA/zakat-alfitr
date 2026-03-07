@@ -17,7 +17,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { format } from 'date-fns';
-import { LayoutGrid, TableIcon, Search, ChevronLeft, ChevronRight, Eye, Edit, Trash2 } from 'lucide-react';
+import { LayoutGrid, TableIcon, Search, ChevronLeft, ChevronRight, Eye, Edit, Trash2, ArrowUpDown } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import {
@@ -52,6 +52,7 @@ export default function MesakinPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 9;
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<'name' | 'date-desc' | 'date-asc'>('date-desc');
 
   useEffect(() => {
     const fetchMesakin = async () => {
@@ -104,6 +105,16 @@ export default function MesakinPage() {
                          m.phone.includes(searchTerm);
     const matchesStatus = statusFilter === 'all' || m.status === statusFilter;
     return matchesSearch && matchesStatus;
+  }).sort((a, b) => {
+    if (sortBy === 'name') {
+      return a.name.localeCompare(b.name);
+    }
+    const dateA = a.registeredAt?.toDate?.() || new Date(0);
+    const dateB = b.registeredAt?.toDate?.() || new Date(0);
+    if (sortBy === 'date-desc') {
+      return dateB.getTime() - dateA.getTime();
+    }
+    return dateA.getTime() - dateB.getTime();
   });
 
   const statuses = ['all', ...Array.from(new Set(mesakin.map(m => m.status)))];
@@ -163,6 +174,15 @@ export default function MesakinPage() {
               {status === 'all' ? 'All Status' : status}
             </option>
           ))}
+        </select>
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value as 'name' | 'date-desc' | 'date-asc')}
+          className="px-3 py-2 border rounded-md bg-white text-sm"
+        >
+          <option value="date-desc">Date (Newest)</option>
+          <option value="date-asc">Date (Oldest)</option>
+          <option value="name">Name (A-Z)</option>
         </select>
       </div>
 

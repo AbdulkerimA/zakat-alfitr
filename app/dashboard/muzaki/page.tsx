@@ -41,6 +41,7 @@ export default function MuzakiPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 9;
+  const [sortBy, setSortBy] = useState<'name' | 'date-desc' | 'date-asc'>('date-desc');
 
   useEffect(() => {
     const fetchMuzaki = async () => {
@@ -83,6 +84,16 @@ export default function MuzakiPage() {
                          m.email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || m.paymentStatus === statusFilter;
     return matchesSearch && matchesStatus;
+  }).sort((a, b) => {
+    if (sortBy === 'name') {
+      return a.name.localeCompare(b.name);
+    }
+    const dateA = a.registeredAt?.toDate?.() || new Date(0);
+    const dateB = b.registeredAt?.toDate?.() || new Date(0);
+    if (sortBy === 'date-desc') {
+      return dateB.getTime() - dateA.getTime();
+    }
+    return dateA.getTime() - dateB.getTime();
   });
 
   const statuses = ['all', ...Array.from(new Set(muzaki.map(m => m.paymentStatus)))];
@@ -142,6 +153,15 @@ export default function MuzakiPage() {
               {status === 'all' ? 'All Status' : status}
             </option>
           ))}
+        </select>
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value as 'name' | 'date-desc' | 'date-asc')}
+          className="px-3 py-2 border rounded-md bg-white text-sm"
+        >
+          <option value="date-desc">Date (Newest)</option>
+          <option value="date-asc">Date (Oldest)</option>
+          <option value="name">Name (A-Z)</option>
         </select>
       </div>
 
