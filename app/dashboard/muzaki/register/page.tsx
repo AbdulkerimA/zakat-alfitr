@@ -188,7 +188,15 @@ export default function MuzakiRegisterPage() {
                     <FormItem>
                       <FormLabel>extra amount</FormLabel>
                       <FormControl>
-                        <Input type="number" placeholder="change" {...field} />
+                        <Input
+                          type="number"
+                          placeholder="change"
+                          value={field.value}
+                          onChange={e => {
+                            const value = Number(e.target.value);
+                            field.onChange(isNaN(value) ? 0 : value);
+                          }}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
