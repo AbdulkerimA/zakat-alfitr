@@ -56,3 +56,50 @@ export interface Distributor {
   active: boolean;
   createdAt: any;
 }
+
+export interface SuperAdmin {
+  id: string;
+  uid: string;
+  email: string;
+  name: string;
+  role: 'super_admin';
+  createdAt: any;
+  lastLogin?: any;
+}
+
+export interface SystemStats {
+  totalMasjids: number;
+  totalUsers: number;
+  totalDistributors: number;
+  totalMesakin: number;
+  totalMuzaki: number;
+  totalCollections: number;
+  totalDistributions: number;
+  recentActivities: Activity[];
+}
+
+export interface Activity {
+  id: string;
+  type: 'masjid_created' | 'user_registered' | 'distribution_made' | 'collection_made';
+  description: string;
+  masjidId?: string;
+  masjidName?: string;
+  userId?: string;
+  timestamp: any;
+}
+
+export interface MasjidSummary {
+  id: string;
+  name: string;
+  city: string;
+  state: string;
+  adminName: string;
+  adminEmail: string;
+  createdAt: any;
+  stats: {
+    mesakin: number;
+    muzaki: number;
+    collections: number;
+    distributions: number;
+  };
+}
