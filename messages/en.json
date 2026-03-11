@@ -46,6 +46,7 @@
   "mesakin": {
     "title": "Mesakin List",
     "register": "Register Mesakin (Recipients)",
+    "registerAndStay": "Register Mesakin and Stay",
     "details": "Mesakin Details",
     "edit": "Edit Mesakin",
     "name": "Full Name",

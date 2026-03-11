@@ -105,7 +105,8 @@ export default function MesakinRegisterPage() {
       });
 
       toast.success(t('registerSuccess'));
-      router.push('/dashboard/mesakin');
+      // make every input fild empty
+      form.reset();
     } catch (error: any) {
       toast.error(error.message || 'Registration failed');
     } finally {

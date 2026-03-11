@@ -90,7 +90,8 @@ export default function MuzakiRegisterPage() {
       });
 
       toast.success(t('muzaki.registerSuccess'));
-      router.push('/dashboard/muzaki');
+      // router.push('/dashboard/muzaki');
+      form.reset();
     } catch (error: any) {
       toast.error(error.message);
     } finally {
