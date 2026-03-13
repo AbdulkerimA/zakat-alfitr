@@ -21,7 +21,7 @@ export default function RegisterPage() {
         <CardContent className="space-y-6">
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <div className="flex gap-2 mb-2">
-              <AlertCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+              <AlertCircle className="h-5 w-5 text-blue-600 hrink-0 mt-0.5" />
               <h3 className="font-semibold text-blue-900">Registration Notice</h3>
             </div>
             <p className="text-sm text-blue-800 mb-3">
