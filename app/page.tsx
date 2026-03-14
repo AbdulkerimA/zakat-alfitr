@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Building, Users, HandHeart, Shield } from 'lucide-react';
+import { Building, Users, HandHeart, Shield, ShieldAlert, TrendingUp, Phone, Send } from 'lucide-react';
 
 export default function HomePage() {
   return (
@@ -31,7 +31,7 @@ export default function HomePage() {
       {/* Features */}
       <section className="container mx-auto px-4 py-16">
         <h2 className="text-3xl font-bold text-center mb-12">Key Features</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           <FeatureCard
             icon={<Building className="h-8 w-8 text-green-600" />}
             title="Masjid-Based"
@@ -52,8 +52,40 @@ export default function HomePage() {
             title="Complete Transparency"
             description="Real-time statistics and full audit trail"
           />
+          <FeatureCard
+            icon={<ShieldAlert className="h-8 w-8 text-green-600" />}
+            title="Fraud Prevention"
+            description="Prevent recipients from registering at different masjids"
+          />
+          <FeatureCard
+            icon={<TrendingUp className="h-8 w-8 text-green-600" />}
+            title="Improved Distribution"
+            description="Distribute quality and large quantity for everybody"
+          />
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="bg-green-800 text-white py-8 mt-16">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="text-center md:text-left">
+              <p className="font-semibold">Developed by Abdulkerim Adem <br /> From Hamza Masjid</p>
+              <p className="text-sm text-green-200">Zakat Management System</p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-4 text-sm">
+              <a href="tel:0904004053" className="flex items-center gap-2 hover:text-green-200 transition-colors">
+                <Phone className="h-4 w-4" />
+                0904004053
+              </a>
+              <a href="https://t.me/programer_abdu" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-green-200 transition-colors">
+                <Send className="h-4 w-4" />
+                @programer_abdu
+              </a>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
