@@ -82,9 +82,7 @@ export default function MuzakiPage() {
   }
 
   const filteredMuzaki = muzaki.filter(m => {
-    const matchesSearch = m.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         m.phone.includes(searchTerm) ||
-                         m.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = m.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || m.paymentStatus === statusFilter;
     return matchesSearch && matchesStatus;
   }).sort((a, b) => {
