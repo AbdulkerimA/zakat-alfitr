@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { format } from 'date-fns';
 import { LayoutGrid, TableIcon, Search, ChevronLeft, ChevronRight, Eye, Edit, Trash2, ArrowUpDown } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
 import {
@@ -53,7 +53,8 @@ export default function MesakinPage() {
   const [viewMode, setViewMode] = useState<'card' | 'table'>('card');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [currentPage, setCurrentPage] = useState(1);
+  const searchParams = useSearchParams();
+  const [currentPage, setCurrentPage] = useState(() => Number(searchParams.get('page')) || 1);
   const itemsPerPage = 9;
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'name' | 'date-desc' | 'date-asc'>('date-desc');
@@ -226,7 +227,7 @@ export default function MesakinPage() {
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">
-                        <Button size="sm" variant="ghost" onClick={() => router.push(`/dashboard/mesakin/${m.id}`)}>
+                        <Button size="sm" variant="ghost" onClick={() => router.push(`/dashboard/mesakin/${m.id}?from=page-${currentPage}`)}>
                           <Eye className="h-4 w-4" />
                         </Button>
                         <Button size="sm" variant="ghost" onClick={() => router.push(`/dashboard/mesakin/${m.id}/edit`)}>
@@ -274,7 +275,7 @@ export default function MesakinPage() {
                   </span>
                 </div>
                 <div className="flex gap-2 pt-2">
-                  <Button size="sm" variant="outline" className="flex-1" onClick={() => router.push(`/dashboard/mesakin/${m.id}`)}>
+                  <Button size="sm" variant="outline" className="flex-1" onClick={() => router.push(`/dashboard/mesakin/${m.id}?from=page-${currentPage}`)}>
                     <Eye className="h-4 w-4 mr-1" /> {tCommon('view')}
                   </Button>
                   <Button size="sm" variant="outline" onClick={() => router.push(`/dashboard/mesakin/${m.id}/edit`)}>
@@ -299,7 +300,11 @@ export default function MesakinPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              onClick={() => {
+                const p = Math.max(1, currentPage - 1);
+                setCurrentPage(p);
+                router.replace(`/dashboard/mesakin?page=${p}`);
+              }}
               disabled={currentPage === 1}
             >
               <ChevronLeft className="h-4 w-4" />
@@ -308,7 +313,11 @@ export default function MesakinPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              onClick={() => {
+                const p = Math.min(totalPages, currentPage + 1);
+                setCurrentPage(p);
+                router.replace(`/dashboard/mesakin?page=${p}`);
+              }}
               disabled={currentPage === totalPages}
             >
               <ChevronRight className="h-4 w-4" />
