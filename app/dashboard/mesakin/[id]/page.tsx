@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { db } from '@/lib/firebase/config';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -27,6 +27,8 @@ interface MesakinDetails {
 export default function MesakinDetailsPage() {
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
+  const fromPage = searchParams.get('from')?.replace('page-', '') || '1';
   const t = useTranslations('mesakin');
   const [mesakin, setMesakin] = useState<MesakinDetails | null>(null);
   const [loading, setLoading] = useState(true);
@@ -99,7 +101,7 @@ export default function MesakinDetailsPage() {
     <div className="max-w-3xl mx-auto space-y-4">
       <Button
         variant="ghost"
-        onClick={() => router.push('/dashboard/mesakin')}
+        onClick={() => router.push(`/dashboard/mesakin?page=${fromPage}`)}
         className="mb-4"
       >
         <ArrowLeft className="h-4 w-4 mr-2" />

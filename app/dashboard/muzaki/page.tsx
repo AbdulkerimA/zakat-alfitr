@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { db } from '@/lib/firebase/config';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   Table,
@@ -17,7 +17,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { format } from 'date-fns';
-import { LayoutGrid, TableIcon, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LayoutGrid, TableIcon, Search, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 interface Muzaki {
@@ -45,6 +45,24 @@ export default function MuzakiPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 9;
   const [sortBy, setSortBy] = useState<'name' | 'date-desc' | 'date-asc'>('date-desc');
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this muzaki?')) return;
+    setDeletingId(id);
+    try {
+      await deleteDoc(doc(db, 'muzaki', id));
+      setMuzaki(prev => prev.filter(m => m.id !== id));
+      setTotalCollected(prev => {
+        const deleted = muzaki.find(m => m.id === id);
+        return deleted ? prev - deleted.amount - deleted.extra : prev;
+      });
+    } catch (error) {
+      console.error('Error deleting muzaki:', error);
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   useEffect(() => {
     const fetchMuzaki = async () => {
@@ -185,6 +203,7 @@ export default function MuzakiPage() {
                   <TableHead>{t('amount')}</TableHead>
                   <TableHead>{t('status')}</TableHead>
                   <TableHead>{t('date')}</TableHead>
+                  <TableHead></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -198,6 +217,11 @@ export default function MuzakiPage() {
                     </TableCell>
                     <TableCell>
                       {m.registeredAt?.toDate ? format(m.registeredAt.toDate(), 'MMM dd, yyyy') : 'N/A'}
+                    </TableCell>
+                    <TableCell>
+                      <Button variant="ghost" size="sm" onClick={() => handleDelete(m.id)} disabled={deletingId === m.id}>
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -231,6 +255,10 @@ export default function MuzakiPage() {
                     {m.registeredAt?.toDate ? format(m.registeredAt.toDate(), 'MMM dd, yyyy') : 'N/A'}
                   </span>
                 </div>
+                <Button variant="outline" size="sm" className="w-full text-red-500 hover:text-red-700 hover:bg-red-50 mt-2" onClick={() => handleDelete(m.id)} disabled={deletingId === m.id}>
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete
+                </Button>
               </CardContent>
             </Card>
           ))}
