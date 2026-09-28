@@ -6,7 +6,7 @@ import { collection, query, where, getDocs } from 'firebase/firestore';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMasjid } from '@/contexts/MasjidContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, Wallet, Users2, Package } from 'lucide-react';
+import { Users, Wallet, Users2, Package, UsersRound } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 interface Stats {
@@ -15,6 +15,7 @@ interface Stats {
   totalCollected: number;
   pendingMesakin: number;
   supportedFamilies: number;
+  totalMuzakiFamilies: number;
 }
 
 export default function DashboardPage() {
@@ -27,6 +28,7 @@ export default function DashboardPage() {
     totalCollected: 0,
     pendingMesakin: 0,
     supportedFamilies: 0,
+    totalMuzakiFamilies: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -52,6 +54,7 @@ export default function DashboardPage() {
         const muzaki = muzakiSnap.docs.map(doc => doc.data());
         
         const totalCollected = muzaki.reduce((sum, m) => sum + (m.amount + m.extra || 0), 0);
+        const totalMuzakiFamilies = muzaki.reduce((sum, m) => sum + (m.peopleCount || 0), 0);
         const pendingMesakin = mesakin.filter(m => m.status === 'pending').length;
         
         const onePersonPackage = config?.packageCost || 100;
@@ -63,6 +66,7 @@ export default function DashboardPage() {
           totalCollected,
           pendingMesakin,
           supportedFamilies,
+          totalMuzakiFamilies,
         });
       } catch (error) {
         console.error('Error fetching stats:', error);
@@ -102,6 +106,12 @@ export default function DashboardPage() {
       desc: t('fromDonations'),
     },
     {
+      title: 'Muzaki Families',
+      value: stats.totalMuzakiFamilies,
+      icon: UsersRound,
+      desc: 'Total family members from donors',
+    },
+    {
       title: t('canSupport'),
       value: stats.supportedFamilies,
       icon: Package,
@@ -113,7 +123,7 @@ export default function DashboardPage() {
     <div className="space-y-4 md:space-y-6">
       <h1 className="text-2xl md:text-3xl font-bold">{t('title')}</h1>
       
-      <div className="grid gap-3 md:gap-4 grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 md:gap-4 grid-cols-2 lg:grid-cols-5">
         {cards.map((card) => {
           const Icon = card.icon;
           return (

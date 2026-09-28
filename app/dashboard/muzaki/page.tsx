@@ -17,7 +17,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { format } from 'date-fns';
-import { LayoutGrid, TableIcon, Search, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
+import { LayoutGrid, TableIcon, Search, ChevronLeft, ChevronRight, Trash2, Users } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 interface Muzaki {
@@ -143,14 +143,31 @@ export default function MuzakiPage() {
         </div>
       </div>
 
-      <Card className="bg-green-50">
-        <CardContent className="pt-6">
-          <div className="text-2xl font-bold text-green-700">
-            {t('totalCollected')}: {totalCollected} ETB
-          </div>
-          <p className="text-sm text-gray-600">{t('fromDonors', { count: muzaki.length })}</p>
-        </CardContent>
-      </Card>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Card className="bg-green-50">
+          <CardContent className="pt-6">
+            <div className="text-2xl font-bold text-green-700">{totalCollected} ETB</div>
+            <p className="text-sm text-gray-600">{t('totalCollected')}</p>
+          </CardContent>
+        </Card>
+        <Card className="bg-blue-50">
+          <CardContent className="pt-6">
+            <div className="text-2xl font-bold text-blue-700">{muzaki.length}</div>
+            <p className="text-sm text-gray-600">{t('fromDonors', { count: muzaki.length }).replace(/\d+/, '').trim() || 'Total Donors'}</p>
+          </CardContent>
+        </Card>
+        <Card className="bg-purple-50">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-purple-600" />
+              <div className="text-2xl font-bold text-purple-700">
+                {muzaki.reduce((sum, m) => sum + (m.peopleCount || 0), 0)}
+              </div>
+            </div>
+            <p className="text-sm text-gray-600">Total Family Members</p>
+          </CardContent>
+        </Card>
+      </div>
 
       <div className="flex flex-col md:flex-row gap-3">
         <div className="relative flex-1">
