@@ -46,12 +46,18 @@ export default function MuzakiPage() {
   const itemsPerPage = 9;
   const [sortBy, setSortBy] = useState<'name' | 'date-desc' | 'date-asc'>('date-desc');
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
+
+  const availableYears = Array.from(
+    { length: new Date().getFullYear() - 2023 },
+    (_, i) => (2024 + i).toString()
+  );
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this muzaki?')) return;
     setDeletingId(id);
     try {
-      await deleteDoc(doc(db, 'muzaki', id));
+      await deleteDoc(doc(db, 'muzaki', selectedYear, 'records', id));
       setMuzaki(prev => prev.filter(m => m.id !== id));
       setTotalCollected(prev => {
         const deleted = muzaki.find(m => m.id === id);
@@ -70,7 +76,7 @@ export default function MuzakiPage() {
 
       try {
         const q = query(
-          collection(db, 'muzaki'),
+          collection(db, 'muzaki', selectedYear, 'records'),
           where('masjidId', '==', masjidId)
         );
         const snapshot = await getDocs(q);
@@ -89,7 +95,7 @@ export default function MuzakiPage() {
     };
 
     fetchMuzaki();
-  }, [masjidId]);
+  }, [masjidId, selectedYear]);
 
   if (loading) {
     return (
@@ -179,6 +185,15 @@ export default function MuzakiPage() {
             className="pl-9"
           />
         </div>
+        <select
+          value={selectedYear}
+          onChange={(e) => { setSelectedYear(e.target.value); setCurrentPage(1); }}
+          className="px-3 py-2 border rounded-md bg-white text-sm"
+        >
+          {availableYears.map(y => (
+            <option key={y} value={y}>{y}</option>
+          ))}
+        </select>
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}

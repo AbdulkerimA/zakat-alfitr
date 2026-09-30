@@ -48,7 +48,7 @@ export default function DashboardPage() {
         
         // Get muzaki count and collections
         const muzakiQuery = query(
-          collection(db, 'muzaki'),
+          collection(db, 'muzaki', currentYear, 'records'),
           where('masjidId', '==', masjidId)
         );
         const muzakiSnap = await getDocs(muzakiQuery);

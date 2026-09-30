@@ -58,15 +58,20 @@ export default function MesakinPage() {
   const itemsPerPage = 9;
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'name' | 'date-desc' | 'date-asc'>('date-desc');
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
+
+  const availableYears = Array.from(
+    { length: new Date().getFullYear() - 2023 },
+    (_, i) => (2024 + i).toString()
+  );
 
   useEffect(() => {
     const fetchMesakin = async () => {
       if (!masjidId) return;
 
       try {
-        const currentYear = new Date().getFullYear().toString();
         const q = query(
-          collection(db, 'mesakin', currentYear, 'records'),
+          collection(db, 'mesakin', selectedYear, 'records'),
           where('masjidId', '==', masjidId)
         );
         const snapshot = await getDocs(q);
@@ -84,13 +89,12 @@ export default function MesakinPage() {
     };
 
     fetchMesakin();
-  }, [masjidId]);
+  }, [masjidId, selectedYear]);
 
   const handleDelete = async () => {
     if (!deleteId) return;
     try {
-      const currentYear = new Date().getFullYear().toString();
-      await deleteDoc(doc(db, 'mesakin', currentYear, 'records', deleteId));
+      await deleteDoc(doc(db, 'mesakin', selectedYear, 'records', deleteId));
       setMesakin(mesakin.filter(m => m.id !== deleteId));
       toast.success(t('deleteSuccess'));
       setDeleteId(null);
@@ -172,6 +176,15 @@ export default function MesakinPage() {
           />
         </div>
         <select
+          value={selectedYear}
+          onChange={(e) => { setSelectedYear(e.target.value); setCurrentPage(1); }}
+          className="px-3 py-2 border rounded-md bg-white text-sm"
+        >
+          {availableYears.map(y => (
+            <option key={y} value={y}>{y}</option>
+          ))}
+        </select>
+        <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
           className="px-3 py-2 border rounded-md bg-white text-sm"
@@ -229,10 +242,10 @@ export default function MesakinPage() {
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">
-                        <Button size="sm" variant="ghost" onClick={() => router.push(`/dashboard/mesakin/${m.id}?from=page-${currentPage}&year=${new Date().getFullYear()}`)}>
+                        <Button size="sm" variant="ghost" onClick={() => router.push(`/dashboard/mesakin/${m.id}?from=page-${currentPage}&year=${selectedYear}`)}>
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button size="sm" variant="ghost" onClick={() => router.push(`/dashboard/mesakin/${m.id}/edit?year=${new Date().getFullYear()}`)}>
+                        <Button size="sm" variant="ghost" onClick={() => router.push(`/dashboard/mesakin/${m.id}/edit?year=${selectedYear}`)}>
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button size="sm" variant="ghost" onClick={() => setDeleteId(m.id)}>
@@ -277,10 +290,10 @@ export default function MesakinPage() {
                   </span>
                 </div>
                 <div className="flex gap-2 pt-2">
-                  <Button size="sm" variant="outline" className="flex-1" onClick={() => router.push(`/dashboard/mesakin/${m.id}?from=page-${currentPage}&year=${new Date().getFullYear()}`)}>
+                  <Button size="sm" variant="outline" className="flex-1" onClick={() => router.push(`/dashboard/mesakin/${m.id}?from=page-${currentPage}&year=${selectedYear}`)}>
                     <Eye className="h-4 w-4 mr-1" /> {tCommon('view')}
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => router.push(`/dashboard/mesakin/${m.id}/edit?year=${new Date().getFullYear()}`)}>
+                  <Button size="sm" variant="outline" onClick={() => router.push(`/dashboard/mesakin/${m.id}/edit?year=${selectedYear}`)}>
                     <Edit className="h-4 w-4" />
                   </Button>
                   <Button size="sm" variant="outline" onClick={() => setDeleteId(m.id)}>

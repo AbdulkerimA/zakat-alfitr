@@ -79,11 +79,13 @@ export default function MuzakiRegisterPage() {
 
     setLoading(true);
     try {
-      await addDoc(collection(db, 'muzaki'), {
+      const currentYear = new Date().getFullYear().toString();
+      await addDoc(collection(db, 'muzaki', currentYear, 'records'), {
         ...values,
         peopleCount: parseInt(values.peopleCount),
         amount: total,
         masjidId,
+        year: currentYear,
         paymentStatus: 'paid',
         registeredBy: user.uid,
         registeredAt: new Date(),
