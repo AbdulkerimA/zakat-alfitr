@@ -38,8 +38,9 @@ export default function DashboardPage() {
 
       try {
         // Get mesakin count
+        const currentYear = new Date().getFullYear().toString();
         const mesakinQuery = query(
-          collection(db, 'mesakin'),
+          collection(db, 'mesakin', currentYear, 'records'),
           where('masjidId', '==', masjidId)
         );
         const mesakinSnap = await getDocs(mesakinQuery);

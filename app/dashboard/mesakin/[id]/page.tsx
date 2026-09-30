@@ -29,6 +29,7 @@ export default function MesakinDetailsPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const fromPage = searchParams.get('from')?.replace('page-', '') || '1';
+  const year = searchParams.get('year') || new Date().getFullYear().toString();
   const t = useTranslations('mesakin');
   const [mesakin, setMesakin] = useState<MesakinDetails | null>(null);
   const [loading, setLoading] = useState(true);
@@ -37,7 +38,7 @@ export default function MesakinDetailsPage() {
   useEffect(() => {
     const fetchMesakin = async () => {
       try {
-        const docRef = doc(db, 'mesakin', params.id as string);
+        const docRef = doc(db, 'mesakin', year, 'records', params.id as string);
         const docSnap = await getDoc(docRef);
         
         if (docSnap.exists()) {
@@ -56,7 +57,7 @@ export default function MesakinDetailsPage() {
   const updateStatus = async (newStatus: string) => {
     setUpdating(true);
     try {
-      await updateDoc(doc(db, 'mesakin', params.id as string), {
+      await updateDoc(doc(db, 'mesakin', year, 'records', params.id as string), {
         status: newStatus,
         updatedAt: new Date(),
       });

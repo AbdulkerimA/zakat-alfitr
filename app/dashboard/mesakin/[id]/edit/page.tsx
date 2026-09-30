@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -35,6 +35,8 @@ const formSchema = z.object({
 export default function EditMesakinPage() {
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
+  const year = searchParams.get('year') || new Date().getFullYear().toString();
   const t = useTranslations('mesakin');
   const tForm = useTranslations('form');
   const tCommon = useTranslations('common');
@@ -56,7 +58,7 @@ export default function EditMesakinPage() {
   useEffect(() => {
     const fetchMesakin = async () => {
       try {
-        const docRef = doc(db, 'mesakin', params.id as string);
+        const docRef = doc(db, 'mesakin', year, 'records', params.id as string);
         const docSnap = await getDoc(docRef);
         
         if (docSnap.exists()) {
@@ -86,7 +88,7 @@ export default function EditMesakinPage() {
   const onSubmit = async (values: any) => {
     setLoading(true);
     try {
-      await updateDoc(doc(db, 'mesakin', params.id as string), {
+      await updateDoc(doc(db, 'mesakin', year, 'records', params.id as string), {
         ...values,
         familyMembers: parseInt(values.familyMembers),
         updatedAt: new Date(),

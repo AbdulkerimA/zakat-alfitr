@@ -64,8 +64,9 @@ export default function MesakinPage() {
       if (!masjidId) return;
 
       try {
+        const currentYear = new Date().getFullYear().toString();
         const q = query(
-          collection(db, 'mesakin'),
+          collection(db, 'mesakin', currentYear, 'records'),
           where('masjidId', '==', masjidId)
         );
         const snapshot = await getDocs(q);
@@ -88,7 +89,8 @@ export default function MesakinPage() {
   const handleDelete = async () => {
     if (!deleteId) return;
     try {
-      await deleteDoc(doc(db, 'mesakin', deleteId));
+      const currentYear = new Date().getFullYear().toString();
+      await deleteDoc(doc(db, 'mesakin', currentYear, 'records', deleteId));
       setMesakin(mesakin.filter(m => m.id !== deleteId));
       toast.success(t('deleteSuccess'));
       setDeleteId(null);
@@ -227,10 +229,10 @@ export default function MesakinPage() {
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">
-                        <Button size="sm" variant="ghost" onClick={() => router.push(`/dashboard/mesakin/${m.id}?from=page-${currentPage}`)}>
+                        <Button size="sm" variant="ghost" onClick={() => router.push(`/dashboard/mesakin/${m.id}?from=page-${currentPage}&year=${new Date().getFullYear()}`)}>
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button size="sm" variant="ghost" onClick={() => router.push(`/dashboard/mesakin/${m.id}/edit`)}>
+                        <Button size="sm" variant="ghost" onClick={() => router.push(`/dashboard/mesakin/${m.id}/edit?year=${new Date().getFullYear()}`)}>
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button size="sm" variant="ghost" onClick={() => setDeleteId(m.id)}>
@@ -275,10 +277,10 @@ export default function MesakinPage() {
                   </span>
                 </div>
                 <div className="flex gap-2 pt-2">
-                  <Button size="sm" variant="outline" className="flex-1" onClick={() => router.push(`/dashboard/mesakin/${m.id}?from=page-${currentPage}`)}>
+                  <Button size="sm" variant="outline" className="flex-1" onClick={() => router.push(`/dashboard/mesakin/${m.id}?from=page-${currentPage}&year=${new Date().getFullYear()}`)}>
                     <Eye className="h-4 w-4 mr-1" /> {tCommon('view')}
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => router.push(`/dashboard/mesakin/${m.id}/edit`)}>
+                  <Button size="sm" variant="outline" onClick={() => router.push(`/dashboard/mesakin/${m.id}/edit?year=${new Date().getFullYear()}`)}>
                     <Edit className="h-4 w-4" />
                   </Button>
                   <Button size="sm" variant="outline" onClick={() => setDeleteId(m.id)}>
