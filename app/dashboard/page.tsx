@@ -331,7 +331,7 @@ export default function DashboardPage() {
                 yaxis: { labels: { formatter: (v: number) => Math.round(v).toString() } },
                 colors: ['#16a34a', '#7c3aed'],
                 dataLabels: { enabled: false },
-                plotOptions: { bar: { borderRadius: 4, columnWidth: '55%', grouped: true } },
+                plotOptions: { bar: { borderRadius: 4, columnWidth: '55%', } },
                 legend: { position: 'top' },
                 grid: { borderColor: '#f0f0f0' },
               }}
