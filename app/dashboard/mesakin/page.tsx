@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { db } from '@/lib/firebase/config';
-import { collection, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore';
+import { collection, query, where, getDocs, deleteDoc, doc, addDoc } from 'firebase/firestore';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   Table,
@@ -17,7 +17,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { format } from 'date-fns';
-import { LayoutGrid, TableIcon, Search, ChevronLeft, ChevronRight, Eye, Edit, Trash2, ArrowUpDown } from 'lucide-react';
+import { LayoutGrid, TableIcon, Search, ChevronLeft, ChevronRight, Eye, Edit, Trash2, Download, Upload } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
@@ -59,6 +59,7 @@ export default function MesakinPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'name' | 'date-desc' | 'date-asc'>('date-desc');
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
+  const [importProgress, setImportProgress] = useState<{ done: number; total: number } | null>(null);
 
   const availableYears = Array.from(
     { length: new Date().getFullYear() - 2023 },
@@ -134,6 +135,83 @@ export default function MesakinPage() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedMesakin = filteredMesakin.slice(startIndex, startIndex + itemsPerPage);
 
+  const downloadCSV = () => {
+    const headers = ['name', 'phone', 'idNumber', 'familyMembers', 'address', 'status', 'notes', 'registeredAt'];
+    const rows = mesakin.map(m => [
+      m.name,
+      m.phone,
+      m.idNumber,
+      m.familyMembers,
+      (m as any).address || '',
+      m.status,
+      (m as any).notes || '',
+      m.registeredAt?.toDate ? format(m.registeredAt.toDate(), 'yyyy-MM-dd') : '',
+    ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(','));
+    const csv = [headers.join(','), ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `mesakin-${selectedYear}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const importCSV = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !masjidId) return;
+    const text = await file.text();
+    const [headerLine, ...lines] = text.trim().split('\n');
+    const headers = headerLine.split(',').map(h => h.replace(/"/g, '').trim());
+    const required = ['name', 'phone', 'idNumber', 'familyMembers'];
+    if (!required.every(r => headers.includes(r))) {
+      toast.error(`CSV must have columns: ${required.join(', ')}`);
+      e.target.value = '';
+      return;
+    }
+    const validLines = lines.filter(l => l.trim());
+    setImportProgress({ done: 0, total: validLines.length });
+    let imported = 0, skipped = 0;
+    for (const line of validLines) {
+      const values: string[] = [];
+      let cur = '', inQuote = false;
+      for (const ch of line) {
+        if (ch === '"') { inQuote = !inQuote; }
+        else if (ch === ',' && !inQuote) { values.push(cur); cur = ''; }
+        else { cur += ch; }
+      }
+      values.push(cur);
+      const row: Record<string, string> = {};
+      headers.forEach((h, i) => { row[h] = (values[i] ?? '').trim(); });
+      if (!row.name || !row.phone) { skipped++; }
+      else {
+        try {
+          await addDoc(collection(db, 'mesakin', selectedYear, 'records'), {
+            name: row.name,
+            phone: row.phone,
+            idNumber: row.idNumber || '',
+            familyMembers: parseInt(row.familyMembers) || 1,
+            address: row.address || '',
+            notes: row.notes || '',
+            status: row.status || 'pending',
+            masjidId,
+            year: selectedYear,
+            registeredBy: 'csv-import',
+            registeredAt: new Date(),
+          });
+          imported++;
+        } catch { skipped++; }
+      }
+      setImportProgress(p => p ? { ...p, done: p.done + 1 } : null);
+    }
+    setImportProgress(null);
+    toast.success(`Imported ${imported} records${skipped ? `, skipped ${skipped}` : ''}`);
+    e.target.value = '';
+    const q = query(collection(db, 'mesakin', selectedYear, 'records'), where('masjidId', '==', masjidId));
+    const snapshot = await getDocs(q);
+    setMesakin(snapshot.docs.map(d => ({ id: d.id, ...d.data() })) as Mesakin[]);
+  };
+
   const getStatusBadge = (status: string) => {
     const colors = {
       pending: 'bg-yellow-100 text-yellow-800',
@@ -147,21 +225,24 @@ export default function MesakinPage() {
     <div className="space-y-4 md:space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl md:text-3xl font-bold">{t('title')}</h1>
-        <div className="hidden md:flex gap-2">
-          <Button
-            variant={viewMode === 'card' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setViewMode('card')}
-          >
-            <LayoutGrid className="h-4 w-4" />
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={downloadCSV}>
+            <Download className="h-4 w-4 mr-1" /> CSV
           </Button>
-          <Button
-            variant={viewMode === 'table' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setViewMode('table')}
-          >
-            <TableIcon className="h-4 w-4" />
-          </Button>
+          <label className="cursor-pointer">
+            <input type="file" accept=".csv" className="hidden" onChange={importCSV} />
+            <span className="inline-flex items-center gap-1 px-3 py-1.5 text-sm border rounded-md bg-white hover:bg-gray-50 font-medium">
+              <Upload className="h-4 w-4" /> Import
+            </span>
+          </label>
+          <div className="hidden md:flex gap-2">
+            <Button variant={viewMode === 'card' ? 'default' : 'outline'} size="sm" onClick={() => setViewMode('card')}>
+              <LayoutGrid className="h-4 w-4" />
+            </Button>
+            <Button variant={viewMode === 'table' ? 'default' : 'outline'} size="sm" onClick={() => setViewMode('table')}>
+              <TableIcon className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -357,6 +438,30 @@ export default function MesakinPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {importProgress && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-xl p-6 w-80 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-green-600" />
+              <p className="font-semibold text-gray-800">Importing records...</p>
+            </div>
+            <div className="space-y-1">
+              <div className="flex justify-between text-sm text-gray-500">
+                <span>{importProgress.done} of {importProgress.total}</span>
+                <span>{Math.round((importProgress.done / importProgress.total) * 100)}%</span>
+              </div>
+              <div className="w-full bg-gray-100 rounded-full h-2.5">
+                <div
+                  className="bg-green-500 h-2.5 rounded-full transition-all duration-150"
+                  style={{ width: `${(importProgress.done / importProgress.total) * 100}%` }}
+                />
+              </div>
+            </div>
+            <p className="text-xs text-gray-400 text-center">Please don't close this page</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
