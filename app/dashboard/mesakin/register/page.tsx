@@ -69,11 +69,11 @@ export default function MesakinRegisterPage() {
 
     setLoading(true);
     try {
-      // Check if phone already exists
-      const phoneQuery = query(
-        collection(db, 'mesakin'),
-        where('phone', '==', values.phone)
-      );
+      const currentYear = new Date().getFullYear().toString();
+      const yearCollection = collection(db, 'mesakin', currentYear, 'records');
+
+      // Check if phone already exists for this year
+      const phoneQuery = query(yearCollection, where('phone', '==', values.phone));
       const phoneSnapshot = await getDocs(phoneQuery);
       
       if (!phoneSnapshot.empty) {
@@ -82,11 +82,8 @@ export default function MesakinRegisterPage() {
         return;
       }
 
-      // Check if ID number already exists
-      const idQuery = query(
-        collection(db, 'mesakin'),
-        where('idNumber', '==', values.idNumber)
-      );
+      // Check if ID number already exists for this year
+      const idQuery = query(yearCollection, where('idNumber', '==', values.idNumber));
       const idSnapshot = await getDocs(idQuery);
       
       if (!idSnapshot.empty) {
@@ -95,10 +92,11 @@ export default function MesakinRegisterPage() {
         return;
       }
 
-      await addDoc(collection(db, 'mesakin'), {
+      await addDoc(yearCollection, {
         ...values,
         familyMembers: parseInt(values.familyMembers),
         masjidId,
+        year: currentYear,
         status: 'pending',
         registeredBy: user.uid,
         registeredAt: new Date(),
