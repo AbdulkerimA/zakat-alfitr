@@ -9,7 +9,6 @@ import {
   UserPlus,
   HandCoins,
   Settings,
-  Package,
   List,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -27,24 +26,57 @@ export function DashboardNav() {
     { href: '/dashboard/config', label: t('settings'), icon: Settings },
   ];
 
+  // The most specific matching item wins, so /dashboard/mesakin/123 highlights
+  // "Mesakin list" and /dashboard/mesakin/register highlights "Register".
+  const activeHref = navItems
+    .filter(
+      (item) =>
+        pathname === item.href ||
+        (item.href !== '/dashboard' && pathname.startsWith(item.href + '/'))
+    )
+    .sort((a, b) => b.href.length - a.href.length)[0]?.href;
+
   return (
-    <aside className="fixed bottom-4 md:bg-white left-1/2 -translate-x-1/2 shadow-lg md:static md:translate-x-0 md:w-64 md:min-h-[calc(100vh-4rem)] z-50">
-      <nav className="bg-white rounded-full shadow-lg md:shadow-none md:rounded-none flex justify-center items-start md:justify-start md:flex-col p-2 md:p-4 gap-1 md:gap-1 md:border-r">
+    <aside
+      className={cn(
+        // Mobile: floating pill at the bottom of the screen
+        'fixed bottom-4 left-1/2 z-50 -translate-x-1/2',
+        // Desktop: sticky sidebar under the header
+        'md:sticky md:bottom-auto md:left-auto md:top-16 md:h-[calc(100vh-4rem)] md:w-64 md:shrink-0 md:translate-x-0 md:self-start md:bg-white/60'
+      )}
+    >
+      <nav
+        className={cn(
+          'flex items-start justify-center gap-1 rounded-full border border-green-100 bg-white/90 p-2 shadow-xl shadow-green-900/10 backdrop-blur-md',
+          'md:h-full md:flex-col md:justify-start md:gap-1 md:rounded-none md:border-0 md:border-r md:bg-transparent md:p-4 md:shadow-none md:backdrop-blur-none'
+        )}
+      >
         {navItems.map((item) => {
           const Icon = item.icon;
+          const isActive = item.href === activeHref;
+
           return (
             <Link
               key={item.href}
               href={item.href}
+              title={item.label}
+              aria-label={item.label}
+              aria-current={isActive ? 'page' : undefined}
               className={cn(
-                'flex flex-col md:flex-row items-center justify-center gap-1 md:gap-3 p-3 md:px-3 md:py-2 rounded-full md:rounded-lg transition-colors',
-                pathname === item.href
-                  ? 'bg-green-600 text-white md:bg-green-50 md:text-green-700'
-                  : 'text-gray-600 hover:bg-gray-100 md:hover:bg-gray-50'
+                'flex items-center justify-center gap-3 rounded-full p-3 text-sm font-medium transition-colors',
+                'md:justify-start md:rounded-lg md:px-3 md:py-2.5',
+                isActive
+                  ? 'bg-green-600 text-white shadow-sm shadow-green-600/30 md:bg-green-50 md:text-green-800 md:shadow-none md:ring-1 md:ring-green-200'
+                  : 'text-gray-500 hover:bg-green-50 hover:text-green-700 md:text-gray-600'
               )}
             >
-              <Icon className="h-5 w-5 md:h-4 md:w-4" />
-              <span className="hidden md:inline text-sm">{item.label}</span>
+              <Icon
+                className={cn(
+                  'h-5 w-5 shrink-0 md:h-4 md:w-4',
+                  isActive ? 'md:text-green-600' : ''
+                )}
+              />
+              <span className="hidden md:inline">{item.label}</span>
             </Link>
           );
         })}
