@@ -55,7 +55,7 @@ export default function MesakinPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const searchParams = useSearchParams();
   const [currentPage, setCurrentPage] = useState(() => Number(searchParams.get('page')) || 1);
-  const itemsPerPage = 9;
+  const itemsPerPage = 24;
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'name' | 'date-desc' | 'date-asc'>('date-desc');
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());

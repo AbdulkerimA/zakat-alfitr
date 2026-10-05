@@ -44,7 +44,7 @@ export default function MuzakiPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 9;
+  const itemsPerPage = 24;
   const [sortBy, setSortBy] = useState<'name' | 'date-desc' | 'date-asc'>('date-desc');
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
